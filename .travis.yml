@@ -35,6 +35,7 @@ cache:
     - $HOME/.cache/pip
 
 services:
+  - elasticsearch
   - redis
   - rabbitmq
 

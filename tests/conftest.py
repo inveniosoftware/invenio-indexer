@@ -55,16 +55,20 @@ def app(request):
         CELERY_CACHE_BACKEND="memory",
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
         CELERY_RESULT_BACKEND="cache",
+        INDEXER_DEFAULT_INDEX='records-default-v1.0.0',
+        INDEXER_DEFAULT_DOC_TYPE='default-v1.0.0',
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        SQLALCHEMY_TRACK_MODIFICATIONS=True,
         TESTING=True,
+        SEARCH_AUTOINDEX=[],
     )
     FlaskCLI(app)
     FlaskCeleryExt(app)
     InvenioDB(app)
     InvenioRecords(app)
-    InvenioSearch(app)
+    search = InvenioSearch(app)
+    search.register_mappings('records', 'data')
     InvenioIndexer(app)
 
     with app.app_context():
@@ -89,7 +93,7 @@ def script_info(app):
 
 @pytest.fixture()
 def queue(app):
-    """Get ScriptInfo object for testing CLI."""
+    """Get queue object for testing bulk operations."""
     queue = app.config['INDEXER_MQ_QUEUE']
 
     with app.app_context():

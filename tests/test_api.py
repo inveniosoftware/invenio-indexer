@@ -68,22 +68,25 @@ def test_indexer_bulk_index(app, queue):
 
 def test_delete_action(app):
     """Test delete action."""
-    testid = str(uuid.uuid4())
-    action = RecordIndexer()._delete_action(
-        dict(id=testid, op='delete', index='idx', doctype='doc'))
-    assert action['_op_type'] == 'delete'
-    assert action['_index'] == 'idx'
-    assert action['_type'] == 'doc'
-    assert action['_id'] == testid
-
-    with patch('invenio_indexer.api.Record.get_record') as r:
-        r.return_value = {'$schema': '/authors/author-1.0.0.json'}
+    with app.app_context():
+        testid = str(uuid.uuid4())
         action = RecordIndexer()._delete_action(
-            dict(id='myid', op='delete', index=None, doctype=None))
+            dict(id=testid, op='delete', index='idx', doc_type='doc'))
         assert action['_op_type'] == 'delete'
-        assert action['_index'] == 'authors-author-1.0.0'
-        assert action['_type'] == 'author-1.0.0'
-        assert action['_id'] == 'myid'
+        assert action['_index'] == 'idx'
+        assert action['_type'] == 'doc'
+        assert action['_id'] == testid
+
+        with patch('invenio_indexer.api.Record.get_record') as r:
+            r.return_value = {'$schema': {
+                '$ref': '/records/authorities/authority-v1.0.0.json'
+            }}
+            action = RecordIndexer()._delete_action(
+                dict(id='myid', op='delete', index=None, doc_type=None))
+            assert action['_op_type'] == 'delete'
+            assert action['_index'] == 'records-authorities-authority-v1.0.0'
+            assert action['_type'] == 'authority-v1.0.0'
+            assert action['_id'] == 'myid'
 
 
 def test_index_action(app):
@@ -102,7 +105,7 @@ def test_index_action(app):
             ))
             assert action['_op_type'] == 'index'
             assert action['_index'] == app.config['INDEXER_DEFAULT_INDEX']
-            assert action['_type'] == app.config['INDEXER_DEFAULT_DOCTYPE']
+            assert action['_type'] == app.config['INDEXER_DEFAULT_DOC_TYPE']
             assert action['_id'] == str(record.id)
             assert action['_version'] == record.revision_id
             assert action['_version_type'] == 'external_gte'
@@ -150,7 +153,7 @@ def test_index(app):
             version=0,
             version_type='force',
             index=app.config['INDEXER_DEFAULT_INDEX'],
-            doctype=app.config['INDEXER_DEFAULT_DOCTYPE'],
+            doc_type=app.config['INDEXER_DEFAULT_DOC_TYPE'],
             body={'title': 'Test'},
         )
 
@@ -172,7 +175,7 @@ def test_delete(app):
         client_mock.delete.assert_called_with(
             id=str(recid),
             index=app.config['INDEXER_DEFAULT_INDEX'],
-            doctype=app.config['INDEXER_DEFAULT_DOCTYPE'],
+            doc_type=app.config['INDEXER_DEFAULT_DOC_TYPE'],
         )
 
         with patch('invenio_indexer.api.RecordIndexer.delete') as fun:

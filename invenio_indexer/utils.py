@@ -22,37 +22,32 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+"""Utility functions for data processing."""
 
-root = true
+from flask import current_app
+from invenio_records.models import RecordMetadata
 
-[*]
-indent_style = space
-end_of_line = lf
-insert_final_newline = true
-trim_trailing_whitespace = true
-charset = utf-8
+from .api import RecordIndexer
 
-# Python files
-[*.py]
-indent_size = 4
-# isort plugin configuration
-known_first_party = invenio_indexer
-known_third_party = invenio_db,invenio_search,invenio_records
-multi_line_output = 2
-default_section = THIRDPARTY
 
-# RST files (used by sphinx)
-[*.rst]
-indent_size = 4
-
-# CSS, HTML, JS, JSON, YML
-[*.{css,html,js,json,yml}]
-indent_size = 2
-
-# Matches the exact files either package.json or .travis.yml
-[{package.json,.travis.yml}]
-indent_size = 2
-
-# Dockerfile
-[Dockerfile]
-indent_size = 4
+def process_models_committed_signal(sender, changes):
+    """Handler for indexing record metadata."""
+    record_indexer = RecordIndexer()
+    op_map = {
+        'insert': 'index',
+        'update': 'index',
+        'delete': 'delete',
+    }
+    with record_indexer.create_producer() as producer:
+        for obj, change in changes:
+            if isinstance(obj, RecordMetadata):
+                if change in op_map:
+                    index, doc_type = record_indexer._record_to_index(
+                        obj.json or {}
+                    )
+                    producer.publish(dict(
+                        op=op_map[change],
+                        id=str(obj.id),
+                        index=index,
+                        doc_type=doc_type,
+                    ))

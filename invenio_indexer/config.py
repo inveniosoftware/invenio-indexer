@@ -31,8 +31,8 @@ from kombu import Exchange, Queue
 INDEXER_DEFAULT_INDEX = "records-record-v1.0.0"
 """Default index to use if no schema is defined."""
 
-INDEXER_DEFAULT_DOCTYPE = "record-v1.0.0"
-"""Default doctype to use if no schema is defined."""
+INDEXER_DEFAULT_DOC_TYPE = "record-v1.0.0"
+"""Default doc_type to use if no schema is defined."""
 
 INDEXER_MQ_EXCHANGE = Exchange('indexer', type='direct')
 """Default exchange for message queue."""

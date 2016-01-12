@@ -26,13 +26,15 @@
 
 from __future__ import absolute_import, print_function
 
+from contextlib import contextmanager
+
 from celery.messaging import establish_connection
 from elasticsearch.helpers import bulk
 from flask import current_app
 from invenio_records.api import Record
-from invenio_search import current_search_client
+from invenio_search import current_search, current_search_client
 from invenio_search.utils import schema_to_index
-from kombu import Producer
+from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -40,13 +42,28 @@ from .signals import before_record_index
 
 
 def _record_to_index(record):
-    """Get index/doctype given a record."""
-    index, doctype = schema_to_index(record.get('$schema', ''))
-    if index and doctype:
-        return index, doctype
+    """Get index/doc_type given a record."""
+    index_names = current_search.mappings.keys()
+    schema = record.get('$schema', '')
+    if isinstance(schema, dict):
+        schema = schema.get('$ref', '')
+
+    index, doc_type = schema_to_index(schema, index_names=index_names)
+
+    if index and doc_type:
+        return index, doc_type
     else:
-        return current_app.config['INDEXER_DEFAULT_INDEX'], \
-            current_app.config['INDEXER_DEFAULT_DOCTYPE']
+        return (current_app.config['INDEXER_DEFAULT_INDEX'],
+                current_app.config['INDEXER_DEFAULT_DOC_TYPE'])
+
+
+class Producer(KombuProducer):
+    """Producer validating published messages."""
+
+    def publish(self, data, **kwargs):
+        """Validate operation type."""
+        assert data.get('op') in {'index', 'create', 'delete', 'update'}
+        return super(Producer, self).publish(data, **kwargs)
 
 
 class RecordIndexer(object):
@@ -56,7 +73,7 @@ class RecordIndexer(object):
     works by queuing requests for indexing records and processing these
     requests in bulk.
 
-    Elasticsearch index and doctype for a record is determined from the
+    Elasticsearch index and doc_type for a record is determined from the
     ``$schema`` attribute.
 
     :param search_client: Elasticsearch client. Defaults to
@@ -91,8 +108,8 @@ class RecordIndexer(object):
     @property
     def mq_routing_key(self):
         """Message queue routing key."""
-        return self._routing_key or \
-            current_app.config['INDEXER_MQ_ROUTING_KEY']
+        return (self._routing_key or
+                current_app.config['INDEXER_MQ_ROUTING_KEY'])
 
     #
     # High-level API
@@ -108,14 +125,14 @@ class RecordIndexer(object):
 
         :param record: Record instance.
         """
-        index, doctype = self._record_to_index(record)
+        index, doc_type = self._record_to_index(record)
 
         return self.client.index(
             id=str(record.id),
             version=record.revision_id,
             version_type=self._version_type,
             index=index,
-            doctype=doctype,
+            doc_type=doc_type,
             body=self._prepare_record(record),
         )
 
@@ -131,12 +148,12 @@ class RecordIndexer(object):
 
         :param record: Record instance.
         """
-        index, doctype = self._record_to_index(record)
+        index, doc_type = self._record_to_index(record)
 
         return self.client.delete(
             id=str(record.id),
             index=index,
-            doctype=doctype,
+            doc_type=doc_type,
         )
 
     def delete_by_id(self, record_uuid):
@@ -170,37 +187,41 @@ class RecordIndexer(object):
             count = bulk(
                 self.client,
                 self._actionsiter(consumer.iterqueue()),
-                stats_only=True)
+                stats_only=True,
+            )
 
             consumer.close()
 
         return count
 
+    @contextmanager
+    def create_producer(self):
+        """Context manager that yields an instance of ``Producer``."""
+        with establish_connection() as conn:
+            yield Producer(
+                conn,
+                exchange=self.mq_exchange,
+                routing_key=self.mq_routing_key,
+                auto_declare=True,
+            )
+
     #
     # Low-level implementation
     #
-    def _bulk_op(self, record_id_iterator, op_type, index=None, doctype=None):
+    def _bulk_op(self, record_id_iterator, op_type, index=None, doc_type=None):
         """Index record in Elasticsearch asynchronously.
 
         :param record_id_iterator: Iterator that yields record UUIDs.
         :param op_type: Indexing operation (one of ``index``, ``create``,
             ``delete`` or ``update``).
         """
-        assert op_type in ('index', 'create', 'delete', 'update')
-
-        with establish_connection() as conn:
-            producer = Producer(
-                conn,
-                exchange=self.mq_exchange,
-                routing_key=self.mq_routing_key,
-                auto_declare=True,
-            )
+        with self.create_producer() as producer:
             for rec in record_id_iterator:
                 producer.publish(dict(
                     id=str(rec),
                     op=op_type,
                     index=index,
-                    doctype=doctype
+                    doc_type=doc_type
                 ))
 
     def _actionsiter(self, message_iterator):
@@ -225,16 +246,15 @@ class RecordIndexer(object):
         :param payload: Decoded message body.
         :returns: Dictionary defining an Elasticsearch bulk 'delete' action.
         """
-        if payload['index'] and payload['doctype']:
-            index, doctype = payload['index'], payload['doctype']
-        else:
+        index, doc_type = payload.get('index'), payload.get('doc_type')
+        if not (index and doc_type):
             record = Record.get_record(payload['id'])
-            index, doctype = self._record_to_index(record)
+            index, doc_type = self._record_to_index(record)
 
         return {
             '_op_type': 'delete',
             '_index': index,
-            '_type': doctype,
+            '_type': doc_type,
             '_id': payload['id'],
         }
 
@@ -245,12 +265,12 @@ class RecordIndexer(object):
         :returns: Dictionary defining an Elasticsearch bulk 'index' action.
         """
         record = Record.get_record(payload['id'])
-        index, doctype = self._record_to_index(record)
+        index, doc_type = self._record_to_index(record)
 
         return {
             '_op_type': 'index',
             '_index': index,
-            '_type': doctype,
+            '_type': doc_type,
             '_id': str(record.id),
             '_version': record.revision_id,
             '_version_type': self._version_type,
