@@ -24,7 +24,6 @@
 
 """Utility functions for data processing."""
 
-from flask import current_app
 from invenio_records.models import RecordMetadata
 
 from .api import RecordIndexer
@@ -42,7 +41,7 @@ def process_models_committed_signal(sender, changes):
         for obj, change in changes:
             if isinstance(obj, RecordMetadata):
                 if change in op_map:
-                    index, doc_type = record_indexer._record_to_index(
+                    index, doc_type = record_indexer.record_to_index(
                         obj.json or {}
                     )
                     producer.publish(dict(

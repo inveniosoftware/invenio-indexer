@@ -95,6 +95,10 @@ class RecordIndexer(object):
         self._routing_key = None
         self._version_type = version_type or 'external_gte'
 
+    def record_to_index(self, record):
+        """Get index/doc_type given a record."""
+        return self._record_to_index(record)
+
     @property
     def mq_queue(self):
         """Message queue queue."""
@@ -125,7 +129,7 @@ class RecordIndexer(object):
 
         :param record: Record instance.
         """
-        index, doc_type = self._record_to_index(record)
+        index, doc_type = self.record_to_index(record)
 
         return self.client.index(
             id=str(record.id),
@@ -148,7 +152,7 @@ class RecordIndexer(object):
 
         :param record: Record instance.
         """
-        index, doc_type = self._record_to_index(record)
+        index, doc_type = self.record_to_index(record)
 
         return self.client.delete(
             id=str(record.id),
@@ -249,7 +253,7 @@ class RecordIndexer(object):
         index, doc_type = payload.get('index'), payload.get('doc_type')
         if not (index and doc_type):
             record = Record.get_record(payload['id'])
-            index, doc_type = self._record_to_index(record)
+            index, doc_type = self.record_to_index(record)
 
         return {
             '_op_type': 'delete',
@@ -265,7 +269,7 @@ class RecordIndexer(object):
         :returns: Dictionary defining an Elasticsearch bulk 'index' action.
         """
         record = Record.get_record(payload['id'])
-        index, doc_type = self._record_to_index(record)
+        index, doc_type = self.record_to_index(record)
 
         return {
             '_op_type': 'index',
