@@ -72,3 +72,13 @@ script:
 
 after_success:
   - coveralls
+
+deploy:
+  provider: pypi
+  user: jirikuncar
+  password:
+    secure: RiFRV2gRaV/7MLELON7vWdfP4wPJDzYNm/+LmbW9rshXJ3IbzstomoNN+QEPvPfaiFs8dKwwo2r7vWUCgGedTY3Rksi2+iSMojOb5VfQJWM+Gy8wP6OdzM8NmjRyYxluWEzJtUY1cyU/ss2M+iqGpZQLdQpTWZ8E+SHpznFP5dFt/MVHUcsW8TTToSK4gJtmREmCxnYG05jE8nS0othg9Qf6LvmaLkdMGNNMcoe2qcmmEWDApjUhYGjF1qHt1ScVukVUQGP8mhV+3086ndASx/Sl5hwbQHm1sJS9rjOhRGqXZvnaxZ6RyDlNNXo+PGeKLHD3ErYBIhPiXY49oLeqlo8Sm5iOKsif8Gi7eK9mXGWrEmXfsvabWlcsqUKdjQYaC5RHCcmAXgQ3yGY3INTRIrmnYhWzN/o1XBESwFUxqlSrANobMZPdHwt2JZJHMJL5GRB8msqsw3Pfq6KZ7Gv4xK/FwK5GGMwSBBhPk2/ewXlvbbZqgwGJueEFSYW8oSoobjViHLoB1TJMbL5gU5hsAezQgg8FCzqiNwx1108HW6GW4KNgAKTnXVAjyS+VUARe/HE9j6C/gK9vJbpPryHsVyLv33DCiFG2jDCrw9scq2H5LU4gtps1bBKfWtEkVOGsj3Hdcbi4C9HVwKpazoiaH38th0q47rpcRLkbZGtOwdQ=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: inveniosoftware/invenio-indexer
