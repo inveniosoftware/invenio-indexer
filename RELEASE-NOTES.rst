@@ -1,8 +1,8 @@
-========================
- Invenio-Indexer v1.0.0
-========================
+==========================
+ Invenio-Indexer v1.0.0a1
+==========================
 
-Invenio-Indexer v1.0.0 was released on TBD, 2016.
+Invenio-Indexer v1.0.0a1 was released on January 19, 2016.
 
 About
 -----
@@ -19,7 +19,7 @@ What's new
 Installation
 ------------
 
-   $ pip install invenio-indexer==1.0.0
+   $ pip install invenio-indexer==1.0.0a1
 
 Documentation
 -------------
