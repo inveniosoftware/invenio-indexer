@@ -61,7 +61,6 @@ def app(request):
             'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
         SQLALCHEMY_TRACK_MODIFICATIONS=True,
         TESTING=True,
-        SEARCH_AUTOINDEX=[],
     )
     FlaskCLI(app)
     FlaskCeleryExt(app)

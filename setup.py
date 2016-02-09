@@ -61,7 +61,7 @@ for reqs in extras_require.values():
 install_requires = [
     'celery>=3.1.19',
     'invenio-records>=1.0.0a8',
-    'invenio-search>=1.0.0a3',
+    'invenio-search>=1.0.0a4',
 ]
 
 packages = find_packages()
