@@ -26,18 +26,48 @@
 
 from __future__ import absolute_import, print_function
 
+import uuid
+from time import sleep
+
 from click.testing import CliRunner
+from invenio_db import db
+from invenio_records import Record
+from invenio_search import current_search_client
 
 from invenio_indexer import cli
+from invenio_indexer.api import RecordIndexer
 
 
 def test_run(script_info):
     """Test run."""
     runner = CliRunner()
     res = runner.invoke(cli.run, [], obj=script_info)
-    assert res.exit_code == 0
+    assert 0 == res.exit_code
 
     runner = CliRunner()
     res = runner.invoke(cli.run, ['-d', '-c', '2'], obj=script_info)
-    assert res.exit_code == 0
+    assert 0 == res.exit_code
     assert 'Starting 2 tasks' in res.output
+
+
+def test_reindex(app, script_info, queue):
+    """Test reindex."""
+    # load records
+    with app.test_request_context():
+        runner = CliRunner()
+        rec_uuid = uuid.uuid4()
+        data = {'title': 'Test0'}
+        record = Record.create(data, id_=rec_uuid)
+        db.session.commit()
+
+        res = runner.invoke(cli.reindex, ['--yes-i-know'], obj=script_info)
+        assert 0 == res.exit_code
+        res = runner.invoke(cli.run, [], obj=script_info)
+        assert 0 == res.exit_code
+
+        sleep(5)
+        indexer = RecordIndexer()
+        index, doc_type = indexer.record_to_index(record)
+        res = current_search_client.get(index=index, doc_type=doc_type,
+                                        id=rec_uuid)
+        assert res['found']

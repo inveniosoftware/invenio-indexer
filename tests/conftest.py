@@ -66,7 +66,7 @@ def app(request):
     FlaskCeleryExt(app)
     InvenioDB(app)
     InvenioRecords(app)
-    search = InvenioSearch(app)
+    search = InvenioSearch(app, entry_point_group=None)
     search.register_mappings('records', 'data')
     InvenioIndexer(app)
 

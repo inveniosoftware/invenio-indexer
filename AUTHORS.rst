@@ -28,3 +28,4 @@ Authors
 Indexer for Invenio.
 
 - Lars Holm Nielsen <lars.holm.nielsen@cern.ch>
+- Jiri Kuncar <jiri.kuncar@cern.ch>

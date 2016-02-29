@@ -28,27 +28,55 @@ from __future__ import absolute_import, print_function
 
 import click
 from flask_cli import with_appcontext
+from invenio_records.models import RecordMetadata
 from invenio_search.cli import index
 
 from .api import RecordIndexer
 from .tasks import process_bulk_queue
 
 
+def abort_if_false(ctx, param, value):
+    """Abort command is value is False."""
+    if not value:
+        ctx.abort()
+
+
 @index.command()
 @click.option(
-    '--delayed', '-d', is_flag=True, help="Run indexing in background.")
+    '--delayed', '-d', is_flag=True, help='Run indexing in background.')
 @click.option(
     '--concurrency', '-c', default=1, type=int,
-    help="Number of concurrent indexing tasks to start.")
+    help='Number of concurrent indexing tasks to start.')
 @with_appcontext
 def run(delayed, concurrency):
     """Run bulk record indexing."""
     if delayed:
         click.secho(
-            "Starting {0} tasks for indexing records...".format(concurrency),
+            'Starting {0} tasks for indexing records...'.format(concurrency),
             fg='green')
         for c in range(0, concurrency):
             process_bulk_queue.delay()
     else:
-        click.secho("Indexing records...", fg='green')
+        click.secho('Indexing records...', fg='green')
         RecordIndexer().process_bulk_queue()
+
+
+@index.command()
+@click.option('--yes-i-know', is_flag=True, callback=abort_if_false,
+              expose_value=False,
+              prompt='Do you really want to reindex all records?')
+@with_appcontext
+def reindex():
+    """Reindex all records.
+
+    NOTE: Deleted records are not removed from the index.
+    """
+    click.secho('Sending records to indexing queue ...', fg='green')
+
+    def records():
+        """Record iterator."""
+        for record in RecordMetadata.query.values(RecordMetadata.id):
+            yield record[0]
+
+    RecordIndexer().bulk_index(records())
+    click.secho('Execute "run" command to process the queue!', fg='yellow')
