@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import click
 from flask_cli import with_appcontext
+from invenio_pidstore.models import PersistentIdentifier
 from invenio_search.cli import index
 
 from .api import RecordIndexer
@@ -52,3 +53,17 @@ def run(delayed, concurrency):
     else:
         click.secho("Indexing records...", fg='green')
         RecordIndexer().process_bulk_queue()
+
+
+@index.command()
+@click.argument('pid_type')
+@with_appcontext
+def reindex(pid_type):
+    """Reindex all records."""
+    query = (x[0] for x in PersistentIdentifier.query.filter_by(
+        pid_type=pid_type, object_type='rec'
+    ).values(
+        PersistentIdentifier.object_uuid
+    ))
+    click.echo("Sending tasks...")
+    RecordIndexer().bulk_index(query)
