@@ -40,9 +40,6 @@ services:
   - rabbitmq
 
 env:
-  - REQUIREMENTS=lowest BROKER_URL=memory://
-  - REQUIREMENTS=release BROKER_URL=memory://
-  - REQUIREMENTS=devel BROKER_URL=memory://
   - REQUIREMENTS=lowest BROKER_URL=redis://localhost:6379/0
   - REQUIREMENTS=lowest BROKER_URL=amqp://localhost:5672//
   - REQUIREMENTS=release BROKER_URL=redis://localhost:6379/0

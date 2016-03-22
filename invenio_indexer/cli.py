@@ -27,6 +27,8 @@
 from __future__ import absolute_import, print_function
 
 import click
+from celery.messaging import establish_connection
+from flask import current_app
 from flask_cli import with_appcontext
 from invenio_records.models import RecordMetadata
 from invenio_search.cli import index
@@ -80,3 +82,49 @@ def reindex():
 
     RecordIndexer().bulk_index(records())
     click.secho('Execute "run" command to process the queue!', fg='yellow')
+
+
+@index.group(chain=True)
+def queue():
+    """Manage indexing queue."""
+
+
+@queue.resultcallback()
+@with_appcontext
+def process_actions(actions):
+    """Process queue actions."""
+    queue = current_app.config['INDEXER_MQ_QUEUE']
+    with establish_connection() as c:
+        q = queue(c)
+        for action in actions:
+            q = action(q)
+
+
+@queue.command('init')
+def init_queue():
+    """Initialize indexing queue."""
+    def action(queue):
+        queue.declare()
+        click.secho('Indexing queue has been initialized.', fg='green')
+        return queue
+    return action
+
+
+@queue.command('purge')
+def purge_queue():
+    """Purge indexing queue."""
+    def action(queue):
+        queue.purge()
+        click.secho('Indexing queue has been purged.', fg='green')
+        return queue
+    return action
+
+
+@queue.command('delete')
+def delete_queue():
+    """Delete indexing queue."""
+    def action(queue):
+        queue.delete()
+        click.secho('Indexing queue has been deleted.', fg='green')
+        return queue
+    return action

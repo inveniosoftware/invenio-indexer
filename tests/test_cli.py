@@ -50,7 +50,7 @@ def test_run(script_info):
     assert 'Starting 2 tasks' in res.output
 
 
-def test_reindex(app, script_info, queue):
+def test_reindex(app, script_info):
     """Test reindex."""
     # load records
     with app.test_request_context():
@@ -59,6 +59,11 @@ def test_reindex(app, script_info, queue):
         data = {'title': 'Test0'}
         record = Record.create(data, id_=rec_uuid)
         db.session.commit()
+
+        # Initialize queue
+        res = runner.invoke(cli.queue, ['init', 'purge'],
+                            obj=script_info)
+        assert 0 == res.exit_code
 
         res = runner.invoke(cli.reindex, ['--yes-i-know'], obj=script_info)
         assert 0 == res.exit_code
@@ -71,3 +76,8 @@ def test_reindex(app, script_info, queue):
         res = current_search_client.get(index=index, doc_type=doc_type,
                                         id=rec_uuid)
         assert res['found']
+
+        # Destroy queue
+        res = runner.invoke(cli.queue, ['delete'],
+                            obj=script_info)
+        assert 0 == res.exit_code
