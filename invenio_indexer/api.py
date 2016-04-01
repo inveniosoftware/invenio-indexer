@@ -284,7 +284,10 @@ class RecordIndexer(object):
     @staticmethod
     def _prepare_record(record):
         """Prepare record data for indexing."""
-        data = record.dumps()
+        if current_app.config['INDEXER_REPLACE_REFS']:
+            data = record.replace_refs()
+        else:
+            data = record.dumps()
 
         # Allow modification of data prior to sending to Elasticsearch.
         before_record_index.send(

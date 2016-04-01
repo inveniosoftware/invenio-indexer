@@ -31,6 +31,8 @@ import uuid
 from celery.messaging import establish_connection
 from invenio_db import db
 from invenio_records.api import Record
+from jsonresolver import JSONResolver
+from jsonresolver.contrib.jsonref import json_loader_factory
 from kombu.compat import Consumer
 from mock import MagicMock, patch
 
@@ -181,3 +183,21 @@ def test_delete(app):
         with patch('invenio_indexer.api.RecordIndexer.delete') as fun:
             RecordIndexer(search_client=client_mock).delete_by_id(recid)
             assert fun.called
+
+
+def test_replace_refs(app):
+    """Test replace refs."""
+    app.config['INDEXER_REPLACE_REFS'] = False
+    app.extensions['invenio-records'].loader_cls = json_loader_factory(
+            JSONResolver(plugins=['demo.json_resolver']))
+
+    with app.app_context():
+        record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
+        data = RecordIndexer._prepare_record(record)
+        assert '$ref' in data
+
+    app.config['INDEXER_REPLACE_REFS'] = True
+    with app.app_context():
+        record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
+        data = RecordIndexer._prepare_record(record)
+        assert '$ref' not in data

@@ -22,27 +22,14 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Indexer for Invenio."""
+"""Test JSON resolver."""
 
 from __future__ import absolute_import, print_function
 
-from kombu import Exchange, Queue
+import jsonresolver
 
-INDEXER_DEFAULT_INDEX = "records-record-v1.0.0"
-"""Default index to use if no schema is defined."""
 
-INDEXER_DEFAULT_DOC_TYPE = "record-v1.0.0"
-"""Default doc_type to use if no schema is defined."""
-
-INDEXER_MQ_EXCHANGE = Exchange('indexer', type='direct')
-"""Default exchange for message queue."""
-
-INDEXER_MQ_QUEUE = Queue(
-    'indexer', exchange=INDEXER_MQ_EXCHANGE, routing_key='indexer')
-"""Default queue for message queue."""
-
-INDEXER_MQ_ROUTING_KEY = 'indexer'
-"""Default routing key for message queue."""
-
-INDEXER_REPLACE_REFS = True
-"""Whether to replace JSONRefs prior to indexing record."""
+@jsonresolver.route('/<path:item>', host='dx.doi.org')
+def test_resolver(item):
+    """Create a nested JSON."""
+    return {'data': item}
