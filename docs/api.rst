@@ -25,6 +25,15 @@
 API Docs
 ========
 
+Configuration
+-------------
+
+.. automodule:: invenio_indexer.config
+   :members:
+
+Record Indexer
+--------------
+
 .. automodule:: invenio_indexer.api
    :members:
    :undoc-members:
