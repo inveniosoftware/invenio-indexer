@@ -137,7 +137,7 @@ class RecordIndexer(object):
             version_type=self._version_type,
             index=index,
             doc_type=doc_type,
-            body=self._prepare_record(record),
+            body=self._prepare_record(record, index, doc_type),
         )
 
     def index_by_id(self, record_uuid):
@@ -278,11 +278,11 @@ class RecordIndexer(object):
             '_id': str(record.id),
             '_version': record.revision_id,
             '_version_type': self._version_type,
-            '_source': self._prepare_record(record),
+            '_source': self._prepare_record(record, index, doc_type),
         }
 
     @staticmethod
-    def _prepare_record(record):
+    def _prepare_record(record, index, doc_type):
         """Prepare record data for indexing."""
         if current_app.config['INDEXER_REPLACE_REFS']:
             data = record.replace_refs()
@@ -294,6 +294,8 @@ class RecordIndexer(object):
             current_app._get_current_object(),
             json=data,
             record=record,
+            index=index,
+            doc_type=doc_type,
         )
 
         return data

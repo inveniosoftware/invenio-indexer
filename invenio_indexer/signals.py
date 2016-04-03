@@ -38,4 +38,6 @@ provided:
 
 - ``json``: The dumped record dictionary which can be modified.
 - ``record``: The record being indexed.
+- ``index``: The index in which the record will be indexed.
+- ``doc_type``: The doc_type for the record.
 """

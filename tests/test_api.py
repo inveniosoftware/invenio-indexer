@@ -97,7 +97,7 @@ def test_index_action(app):
         record = Record.create({'title': 'Test'})
         db.session.commit()
 
-        def receiver(sender, json=None, record=None):
+        def receiver(sender, json=None, record=None, **kwargs):
             json['extra'] = 'extra'
 
         with before_record_index.connected_to(receiver):
@@ -193,11 +193,11 @@ def test_replace_refs(app):
 
     with app.app_context():
         record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
-        data = RecordIndexer._prepare_record(record)
+        data = RecordIndexer._prepare_record(record, 'records', 'record')
         assert '$ref' in data
 
     app.config['INDEXER_REPLACE_REFS'] = True
     with app.app_context():
         record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
-        data = RecordIndexer._prepare_record(record)
+        data = RecordIndexer._prepare_record(record, 'records', 'record')
         assert '$ref' not in data

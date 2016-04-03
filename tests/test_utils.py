@@ -27,14 +27,12 @@
 
 from __future__ import absolute_import, print_function
 
-from time import sleep
-
 from click.testing import CliRunner
 from flask_cli import ScriptInfo
 from flask_sqlalchemy import models_committed
 from invenio_db import db
 from invenio_search.cli import index as cmd
-from invenio_search.proxies import current_search, current_search_client
+from invenio_search.proxies import current_search_client
 
 from invenio_indexer.api import RecordIndexer
 from invenio_indexer.signals import before_record_index
@@ -44,7 +42,7 @@ from invenio_indexer.utils import process_models_committed_signal
 def test_record_indexing(app, queue):
     """Run record autoindexer."""
     @before_record_index.connect_via(app)
-    def remove_schema(sender, json=None, record=None):
+    def remove_schema(sender, json=None, record=None, **kwargs):
         if '$schema' in json:
             del json['$schema']
 
