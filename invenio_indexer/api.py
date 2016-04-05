@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+import copy
 from contextlib import contextmanager
 
 from celery.messaging import establish_connection
@@ -285,7 +286,7 @@ class RecordIndexer(object):
     def _prepare_record(record, index, doc_type):
         """Prepare record data for indexing."""
         if current_app.config['INDEXER_REPLACE_REFS']:
-            data = record.replace_refs()
+            data = copy.deepcopy(record.replace_refs())
         else:
             data = record.dumps()
 

@@ -76,10 +76,8 @@ def test_record_indexing(app, queue):
             })
             db.session.add(record1)
             record2 = RecordMetadata(json={
-                '$schema': {
-                    '$ref': ('http://example.com/schemas/'  # external site
-                             'records/default-v1.0.0.json')
-                },
+                '$schema': ('http://example.com/schemas/'  # external site
+                            'records/default-v1.0.0.json'),
                 'title': 'Test2',
             })
             db.session.add(record2)

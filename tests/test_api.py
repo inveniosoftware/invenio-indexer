@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+import json
 import uuid
 
 from celery.messaging import establish_connection
@@ -201,3 +202,4 @@ def test_replace_refs(app):
         record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
         data = RecordIndexer._prepare_record(record, 'records', 'record')
         assert '$ref' not in data
+        assert json.dumps(data)
