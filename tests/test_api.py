@@ -140,6 +140,31 @@ def test_process_bulk_queue(app, queue):
                 ['index', 'delete']
 
 
+def test_process_bulk_queue_errors(app, queue):
+    """Test error handling during indexing."""
+    with app.app_context():
+        # Create a test record
+        r1 = Record.create({
+            'title': 'invalid', 'reffail': {'$ref': '#/invalid'}})
+        r2 = Record.create({
+            'title': 'valid', })
+        db.session.commit()
+
+        RecordIndexer().bulk_index([r1.id, r2.id])
+
+        ret = {}
+
+        def _mock_bulk(client, actions_iterator, **kwargs):
+            ret['actions'] = list(actions_iterator)
+            return len(ret['actions'])
+
+        with patch('invenio_indexer.api.bulk', _mock_bulk):
+            # Exceptions are caught
+            assert RecordIndexer().process_bulk_queue() == 1
+            assert len(ret['actions']) == 1
+            assert ret['actions'][0]['_id'] == str(r2.id)
+
+
 def test_index(app):
     """Test record indexing."""
     with app.app_context():

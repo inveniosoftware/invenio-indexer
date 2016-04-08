@@ -244,6 +244,11 @@ class RecordIndexer(object):
                 message.ack()
             except NoResultFound:
                 message.reject()
+            except Exception:
+                message.reject()
+                current_app.logger.error(
+                    "Failed to index record {0}".format(payload.get('id')),
+                    exc_info=True)
 
     def _delete_action(self, payload):
         """Bulk delete action.
