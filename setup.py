@@ -124,7 +124,9 @@ setup(
         'invenio_base.apps': [
             'invenio_indexer = invenio_indexer:InvenioIndexer',
         ],
-        # 'invenio_base.api_apps': [],
+        'invenio_base.api_apps': [
+            'invenio_indexer = invenio_indexer:InvenioIndexer',
+        ],
         'invenio_celery.tasks': [
             'invenio_indexer = invenio_indexer.tasks',
         ],
