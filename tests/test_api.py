@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import json
 import uuid
 
+import pytz
 from celery.messaging import establish_connection
 from invenio_db import db
 from invenio_records.api import Record
@@ -182,7 +183,11 @@ def test_index(app):
             version_type='force',
             index=app.config['INDEXER_DEFAULT_INDEX'],
             doc_type=app.config['INDEXER_DEFAULT_DOC_TYPE'],
-            body={'title': 'Test'},
+            body={
+                'title': 'Test',
+                '_created': pytz.utc.localize(record.created).isoformat(),
+                '_updated': pytz.utc.localize(record.updated).isoformat(),
+            },
         )
 
         with patch('invenio_indexer.api.RecordIndexer.index') as fun:

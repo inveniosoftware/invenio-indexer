@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import copy
 from contextlib import contextmanager
 
+import pytz
 from celery.messaging import establish_connection
 from elasticsearch.helpers import bulk
 from flask import current_app
@@ -294,6 +295,11 @@ class RecordIndexer(object):
             data = copy.deepcopy(record.replace_refs())
         else:
             data = record.dumps()
+
+        data['_created'] = pytz.utc.localize(record.created).isoformat() \
+            if record.created else None
+        data['_updated'] = pytz.utc.localize(record.updated).isoformat() \
+            if record.updated else None
 
         # Allow modification of data prior to sending to Elasticsearch.
         before_record_index.send(

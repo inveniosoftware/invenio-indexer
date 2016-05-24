@@ -62,6 +62,7 @@ install_requires = [
     'celery>=3.1.19',
     'invenio-records>=1.0.0a8',
     'invenio-search>=1.0.0a4',
+    'pytz>=2016.4',
 ]
 
 packages = find_packages()
