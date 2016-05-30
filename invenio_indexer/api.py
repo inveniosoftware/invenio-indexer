@@ -190,10 +190,13 @@ class RecordIndexer(object):
                 routing_key=self.mq_routing_key,
             )
 
+            req_timeout = current_app.config['INDEXER_BULK_REQUEST_TIMEOUT']
+
             count = bulk(
                 self.client,
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
+                request_timeout=req_timeout
             )
 
             consumer.close()

@@ -46,3 +46,6 @@ INDEXER_MQ_ROUTING_KEY = 'indexer'
 
 INDEXER_REPLACE_REFS = True
 """Whether to replace JSONRefs prior to indexing record."""
+
+INDEXER_BULK_REQUEST_TIMEOUT = 10
+"""Request timeout to use in Bulk indexing."""
