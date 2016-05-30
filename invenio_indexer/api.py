@@ -196,7 +196,7 @@ class RecordIndexer(object):
                 self.client,
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
-                request_timeout=req_timeout
+                request_timeout=req_timeout,
             )
 
             consumer.close()
