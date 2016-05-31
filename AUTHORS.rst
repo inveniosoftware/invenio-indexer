@@ -29,3 +29,5 @@ Indexer for Invenio.
 
 - Lars Holm Nielsen <lars.holm.nielsen@cern.ch>
 - Jiri Kuncar <jiri.kuncar@cern.ch>
+- Leonardo Rossi <leonardo.r@cern.ch>
+- Javier Martin Montull <javier.martin.montull@cern.ch>
