@@ -30,7 +30,11 @@ from .api import RecordIndexer
 
 
 def process_models_committed_signal(sender, changes):
-    """Handler for indexing record metadata."""
+    """Handler for indexing record metadata.
+
+    :param sender: The signal sender.
+    :param changes: The changes sent: a list of tuple (record, action).
+    """
     record_indexer = RecordIndexer()
     op_map = {
         'insert': 'index',

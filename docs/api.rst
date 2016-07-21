@@ -36,7 +36,6 @@ Record Indexer
 
 .. automodule:: invenio_indexer.api
    :members:
-   :undoc-members:
 
 
 Flask Extension
@@ -44,7 +43,6 @@ Flask Extension
 
 .. automodule:: invenio_indexer.ext
    :members:
-   :undoc-members:
 
 
 Celery tasks
@@ -52,7 +50,6 @@ Celery tasks
 
 .. automodule:: invenio_indexer.tasks
    :members:
-   :undoc-members:
 
 
 Signals
@@ -60,4 +57,3 @@ Signals
 
 .. automodule:: invenio_indexer.signals
    :members:
-   :undoc-members:

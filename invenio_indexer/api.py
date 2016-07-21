@@ -44,7 +44,14 @@ from .signals import before_record_index
 
 
 def _record_to_index(record):
-    """Get index/doc_type given a record."""
+    """Default function to get index/doc_type given a record.
+
+    It tries to extract from `record['$schema']` the index and doc_type.
+    If it fails, return the default values.
+
+    :param record: The record object.
+    :returns: Tuple (index, doc_type).
+    """
     index_names = current_search.mappings.keys()
     schema = record.get('$schema', '')
     if isinstance(schema, dict):
@@ -69,27 +76,26 @@ class Producer(KombuProducer):
 
 
 class RecordIndexer(object):
-    """Record indexer.
+    r"""Provide an interface for indexing records in Elasticsearch.
 
-    Provides an interface for indexing records in Elasticsearch. Bulk indexing
-    works by queuing requests for indexing records and processing these
-    requests in bulk.
-
-    Elasticsearch index and doc_type for a record is determined from the
-    ``$schema`` attribute.
-
-    :param search_client: Elasticsearch client. Defaults to
-        ``current_search_client``
-    :param exchange: ``kombu.Exchange`` instance for message queue.
-    :param queue: ``kombu.Queue`` instance for message queue.
-    :param routing_key: Routing key for message queue.
-    :param version_type: Elasticsearch version type. Defaults to
-        ``external_gte``.
+    Bulk indexing works by queuing requests for indexing records and processing
+    these requests in bulk.
     """
 
     def __init__(self, search_client=None, exchange=None, queue=None,
                  routing_key=None, version_type=None, record_to_index=None):
-        """Initialize indexer."""
+        """Initialize indexer.
+
+        :param search_client: Elasticsearch client.
+            (Default: ``current_search_client``)
+        :param exchange: A :class:`kombu.Exchange` instance for message queue.
+        :param queue: A :class:`kombu.Queue` instance for message queue.
+        :param routing_key: Routing key for message queue.
+        :param version_type: Elasticsearch version type.
+            (Default: ``external_gte``)
+        :param record_to_index: Function to extract the index and doc_type
+            from the record.
+        """
         self.client = search_client or current_search_client
         self._exchange = None
         self._queue = None
@@ -98,22 +104,35 @@ class RecordIndexer(object):
         self._version_type = version_type or 'external_gte'
 
     def record_to_index(self, record):
-        """Get index/doc_type given a record."""
+        """Get index/doc_type given a record.
+
+        :param record: The record where to look for the information.
+        :returns: A tuple (index, doc_type).
+        """
         return self._record_to_index(record)
 
     @property
     def mq_queue(self):
-        """Message queue queue."""
+        """Message Queue queue.
+
+        :returns: The Message Queue queue.
+        """
         return self._queue or current_app.config['INDEXER_MQ_QUEUE']
 
     @property
     def mq_exchange(self):
-        """Message queue exchange."""
+        """Message Queue exchange.
+
+        :returns: The Message Queue exchange.
+        """
         return self._exchange or current_app.config['INDEXER_MQ_EXCHANGE']
 
     @property
     def mq_routing_key(self):
-        """Message queue routing key."""
+        """Message Queue routing key.
+
+        :returns: The Message Queue routing key.
+        """
         return (self._routing_key or
                 current_app.config['INDEXER_MQ_ROUTING_KEY'])
 
@@ -223,6 +242,8 @@ class RecordIndexer(object):
         :param record_id_iterator: Iterator that yields record UUIDs.
         :param op_type: Indexing operation (one of ``index``, ``create``,
             ``delete`` or ``update``).
+        :param index: The Elasticsearch index. (Default: ``None``)
+        :param doc_type: The Elasticsearch doc_type. (Default: ``None``)
         """
         with self.create_producer() as producer:
             for rec in record_id_iterator:
@@ -293,7 +314,13 @@ class RecordIndexer(object):
 
     @staticmethod
     def _prepare_record(record, index, doc_type):
-        """Prepare record data for indexing."""
+        """Prepare record data for indexing.
+
+        :param record: The record to prepare.
+        :param index: The Elasticsearch index.
+        :param doc_type: The Elasticsearch document type.
+        :returns: The record metadata.
+        """
         if current_app.config['INDEXER_REPLACE_REFS']:
             data = copy.deepcopy(record.replace_refs())
         else:

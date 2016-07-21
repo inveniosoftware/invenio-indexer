@@ -42,11 +42,17 @@ def process_bulk_queue():
 
 @shared_task(ignore_result=True)
 def index_record(record_uuid):
-    """Index a single record."""
+    """Index a single record.
+
+    :param record_uuid: The record UUID.
+    """
     RecordIndexer().index_by_id(record_uuid)
 
 
 @shared_task(ignore_result=True)
 def delete_record(record_uuid):
-    """Delete a single record."""
+    """Delete a single record.
+
+    :param record_uuid: The record UUID.
+    """
     RecordIndexer().delete_by_id(record_uuid)

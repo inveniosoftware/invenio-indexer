@@ -34,17 +34,26 @@ class InvenioIndexer(object):
     """Invenio-Indexer extension."""
 
     def __init__(self, app=None):
-        """Extension initialization."""
+        """Extension initialization.
+
+        :param app: The Flask application. (Default: ``None``)
+        """
         if app:
             self.init_app(app)
 
     def init_app(self, app):
-        """Flask application initialization."""
+        """Flask application initialization.
+
+        :param app: The Flask application.
+        """
         self.init_config(app)
         app.extensions['invenio-indexer'] = self
 
     def init_config(self, app):
-        """Initialize configuration."""
+        """Initialize configuration.
+
+        :param app: The Flask application.
+        """
         for k in dir(config):
             if k.startswith('INDEXER_'):
                 app.config.setdefault(k, getattr(config, k))
