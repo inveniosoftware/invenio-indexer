@@ -26,6 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
+from flask import current_app
+from werkzeug.utils import cached_property, import_string
+
 from . import config
 from .cli import run  # noqa
 
@@ -57,3 +60,8 @@ class InvenioIndexer(object):
         for k in dir(config):
             if k.startswith('INDEXER_'):
                 app.config.setdefault(k, getattr(config, k))
+
+    @cached_property
+    def record_to_index(self):
+        """Import the configurable 'record_to_index' function."""
+        return import_string(current_app.config.get('INDEXER_RECORD_TO_INDEX'))

@@ -24,7 +24,10 @@
 
 """Utility functions for data processing."""
 
+from flask import current_app
 from invenio_records.models import RecordMetadata
+from invenio_search import current_search
+from invenio_search.utils import schema_to_index
 
 from .api import RecordIndexer
 
@@ -54,3 +57,26 @@ def process_models_committed_signal(sender, changes):
                         index=index,
                         doc_type=doc_type,
                     ))
+
+
+def default_record_to_index(record):
+    """Default function to get index/doc_type given a record.
+
+    It tries to extract from `record['$schema']` the index and doc_type.
+    If it fails, return the default values.
+
+    :param record: The record object.
+    :returns: Tuple (index, doc_type).
+    """
+    index_names = current_search.mappings.keys()
+    schema = record.get('$schema', '')
+    if isinstance(schema, dict):
+        schema = schema.get('$ref', '')
+
+    index, doc_type = schema_to_index(schema, index_names=index_names)
+
+    if index and doc_type:
+        return index, doc_type
+    else:
+        return (current_app.config['INDEXER_DEFAULT_INDEX'],
+                current_app.config['INDEXER_DEFAULT_DOC_TYPE'])

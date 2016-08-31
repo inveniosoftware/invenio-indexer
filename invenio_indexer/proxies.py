@@ -22,33 +22,12 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Indexer for Invenio."""
+"""Proxy objects for easier access to application objects."""
 
-from __future__ import absolute_import, print_function
+from flask import current_app
+from werkzeug.local import LocalProxy
 
-from kombu import Exchange, Queue
 
-INDEXER_DEFAULT_INDEX = "records-record-v1.0.0"
-"""Default index to use if no schema is defined."""
-
-INDEXER_DEFAULT_DOC_TYPE = "record-v1.0.0"
-"""Default doc_type to use if no schema is defined."""
-
-INDEXER_MQ_EXCHANGE = Exchange('indexer', type='direct')
-"""Default exchange for message queue."""
-
-INDEXER_MQ_QUEUE = Queue(
-    'indexer', exchange=INDEXER_MQ_EXCHANGE, routing_key='indexer')
-"""Default queue for message queue."""
-
-INDEXER_MQ_ROUTING_KEY = 'indexer'
-"""Default routing key for message queue."""
-
-INDEXER_REPLACE_REFS = True
-"""Whether to replace JSONRefs prior to indexing record."""
-
-INDEXER_BULK_REQUEST_TIMEOUT = 10
-"""Request timeout to use in Bulk indexing."""
-
-INDEXER_RECORD_TO_INDEX = 'invenio_indexer.utils.default_record_to_index'
-"""Provide an implemetation of record_to_index function"""
+def _get_current_record_to_index():
+    return current_app.extensions['invenio-indexer'].record_to_index
+current_record_to_index = LocalProxy(_get_current_record_to_index)

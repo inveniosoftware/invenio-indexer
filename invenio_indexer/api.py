@@ -34,36 +34,13 @@ from celery.messaging import establish_connection
 from elasticsearch.helpers import bulk
 from flask import current_app
 from invenio_records.api import Record
-from invenio_search import current_search, current_search_client
-from invenio_search.utils import schema_to_index
+from invenio_search import current_search_client
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
 from sqlalchemy.orm.exc import NoResultFound
 
+from .proxies import current_record_to_index
 from .signals import before_record_index
-
-
-def _record_to_index(record):
-    """Default function to get index/doc_type given a record.
-
-    It tries to extract from `record['$schema']` the index and doc_type.
-    If it fails, return the default values.
-
-    :param record: The record object.
-    :returns: Tuple (index, doc_type).
-    """
-    index_names = current_search.mappings.keys()
-    schema = record.get('$schema', '')
-    if isinstance(schema, dict):
-        schema = schema.get('$ref', '')
-
-    index, doc_type = schema_to_index(schema, index_names=index_names)
-
-    if index and doc_type:
-        return index, doc_type
-    else:
-        return (current_app.config['INDEXER_DEFAULT_INDEX'],
-                current_app.config['INDEXER_DEFAULT_DOC_TYPE'])
 
 
 class Producer(KombuProducer):
@@ -99,7 +76,7 @@ class RecordIndexer(object):
         self.client = search_client or current_search_client
         self._exchange = None
         self._queue = None
-        self._record_to_index = record_to_index or _record_to_index
+        self._record_to_index = record_to_index or current_record_to_index
         self._routing_key = None
         self._version_type = version_type or 'external_gte'
 
