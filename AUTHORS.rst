@@ -31,3 +31,4 @@ Indexer for Invenio.
 - Jiri Kuncar <jiri.kuncar@cern.ch>
 - Leonardo Rossi <leonardo.r@cern.ch>
 - Javier Martin Montull <javier.martin.montull@cern.ch>
+- Alizee Pace <alizee.pace@gmail.com>
