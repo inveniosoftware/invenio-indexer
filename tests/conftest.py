@@ -50,7 +50,8 @@ def app(request):
     instance_path = tempfile.mkdtemp()
     app = Flask('testapp', instance_path=instance_path)
     app.config.update(
-        BROKER_URL=os.environ.get('BROKER_URL', 'memory://'),
+        BROKER_URL=os.environ.get('BROKER_URL',
+                                  'amqp://guest:guest@localhost:5672//'),
         CELERY_ALWAYS_EAGER=True,
         CELERY_CACHE_BACKEND="memory",
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
