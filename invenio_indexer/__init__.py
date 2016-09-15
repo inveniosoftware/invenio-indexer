@@ -33,14 +33,11 @@ and sent to Elasticsearch.
 
 Initialization
 --------------
-First create a Flask application (Flask-CLI is not needed for Flask
-version 1.0+):
+First create a Flask application:
 
 >>> from flask import Flask
->>> from flask_cli import FlaskCLI
 >>> app = Flask('myapp')
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
->>> ext_cli = FlaskCLI(app)
 
 You initialize Indexer like a normal Flask extension, however
 Invenio-Indexer is dependent on Invenio-Records and Invenio-Search so you

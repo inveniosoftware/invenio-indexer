@@ -29,7 +29,7 @@ from __future__ import absolute_import, print_function
 import click
 from celery.messaging import establish_connection
 from flask import current_app
-from flask_cli import with_appcontext
+from flask.cli import with_appcontext
 from invenio_records.models import RecordMetadata
 from invenio_search.cli import index
 

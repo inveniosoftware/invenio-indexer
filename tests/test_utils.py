@@ -28,7 +28,7 @@
 from __future__ import absolute_import, print_function
 
 from click.testing import CliRunner
-from flask_cli import ScriptInfo
+from flask.cli import ScriptInfo
 from flask_sqlalchemy import models_committed
 from invenio_db import db
 from invenio_search.cli import index as cmd

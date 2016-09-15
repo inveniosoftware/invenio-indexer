@@ -25,10 +25,8 @@
 """Indexer for Invenio."""
 
 import os
-import sys
 
 from setuptools import find_packages, setup
-from setuptools.command.test import test as TestCommand
 
 readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
@@ -63,6 +61,7 @@ setup_requires = [
 ]
 
 install_requires = [
+    'Flask>=0.11.1',
     'celery>=3.1.19',
     'invenio-records>=1.0.0a8',
     'invenio-search>=1.0.0a4',
@@ -70,12 +69,6 @@ install_requires = [
 ]
 
 packages = find_packages()
-
-
-
-
-
-
 
 # Get the version string. Cannot be done with import!
 g = {}
@@ -110,6 +103,7 @@ setup(
     },
     extras_require=extras_require,
     install_requires=install_requires,
+    setup_requires=setup_requires,
     tests_require=tests_require,
     classifiers=[
         'Environment :: Web Environment',

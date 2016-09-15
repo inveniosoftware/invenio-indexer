@@ -33,8 +33,8 @@ import tempfile
 import pytest
 from celery.messaging import establish_connection
 from flask import Flask
+from flask.cli import ScriptInfo
 from flask_celeryext import FlaskCeleryExt
-from flask_cli import FlaskCLI, ScriptInfo
 from invenio_db import InvenioDB, db
 from invenio_records import InvenioRecords
 from invenio_search import InvenioSearch
@@ -62,7 +62,6 @@ def app(request):
         SQLALCHEMY_TRACK_MODIFICATIONS=True,
         TESTING=True,
     )
-    FlaskCLI(app)
     FlaskCeleryExt(app)
     InvenioDB(app)
     InvenioRecords(app)

@@ -48,7 +48,6 @@ import os
 
 from flask import Flask
 from flask_celeryext import FlaskCeleryExt
-from flask_cli import FlaskCLI
 from invenio_db import InvenioDB, db
 from invenio_records import InvenioRecords
 from invenio_records.api import Record
@@ -71,7 +70,6 @@ app.config.update(
                                       'sqlite:///app.db'),
 )
 
-FlaskCLI(app)
 FlaskCeleryExt(app)
 InvenioDB(app)
 InvenioRecords(app)
