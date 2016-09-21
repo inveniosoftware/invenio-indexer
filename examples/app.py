@@ -31,7 +31,8 @@ Run ElasticSearch and RabbitMQ server and then run example development server:
 
     $ pip install -e .[all]
     $ cd examples
-    $ ./app-recreate.sh
+    $ ./app-setup.sh
+    $ ./app-fixtures.sh
 
 Try to get some records:
 
@@ -40,6 +41,13 @@ Try to get some records:
     $ curl -X GET localhost:9200/_cat/indices?v
     $ curl -X GET localhost:9200/testrecords-testrecord-v1.0.0/_search | \
         python -m json.tool
+
+To be able to uninstall the example app:
+
+.. code-block:: console
+
+    $ ./app-teardown.sh
+
 """
 
 from __future__ import absolute_import, print_function
@@ -63,11 +71,11 @@ app.config.update(
     CELERY_CACHE_BACKEND='memory',
     CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
     CELERY_RESULT_BACKEND='cache',
-    SQLALCHEMY_TRACK_MODIFICATIONS=True,
-    INDEXER_DEFAULT_INDEX=index_name,
     INDEXER_DEFAULT_DOC_TYPE='testrecord-v1.0.0',
+    INDEXER_DEFAULT_INDEX=index_name,
     SQLALCHEMY_DATABASE_URI=os.getenv('SQLALCHEMY_DATABASE_URI',
                                       'sqlite:///app.db'),
+    SQLALCHEMY_TRACK_MODIFICATIONS=True,
 )
 
 FlaskCeleryExt(app)
