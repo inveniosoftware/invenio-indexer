@@ -24,7 +24,7 @@ Installation
 Documentation
 -------------
 
-   http://pythonhosted.org/invenio-indexer/
+   http://invenio-indexer.readthedocs.io/
 
 Happy hacking and thanks for flying Invenio-Indexer.
 
