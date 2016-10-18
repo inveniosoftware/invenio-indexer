@@ -103,7 +103,18 @@ InvenioIndexer(app)
 @signals.before_record_index.connect_via(app)
 def full_text_indexer(sender, json=None, record=None, index=None,
                       doc_type=None):
-    return
+    for index, data in enumerate(record['_files']):
+        settings = json['_files'][index].pop('_index', None)
+        if settings:
+            obj = ObjectVersion.get(data['bucket'], data['key'],
+                                    data['version_id'])
+            json['_files'][index]['file'] = {
+                "_content": base64.b64encode(obj.file.storage().open().read())
+                .decode('utf-8'),
+                "_indexed_chars": -1,
+            }
+            if isinstance(settings, dict):
+                json['_files'][index]['file'].update(settings)
 
 
 @app.cli.group()
@@ -154,11 +165,11 @@ def records():
             RecordsBuckets.create(bucket=bucket, record=record.model)
 
             record.files["key"] = BytesIO(b'hello world')
-            record['_files'] = record.files.dumps()
-            record['_files'][0]['file'] = {
-                "_content": base64.b64encode(b'hwllo world').decode('utf-8'),
-                "_indexed_chars": -1,
+            record.files["key"]['_index'] = {
+                "_indexed_chars": idx-1,
+                "_detect_language": "yes"
             }
+            record['_files'] = record.files.dumps()
             record.commit()
 
     db.session.commit()
