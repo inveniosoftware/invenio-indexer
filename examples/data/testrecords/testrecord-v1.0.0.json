@@ -1,70 +1,82 @@
 {
-  "mappings": {
-    "testrecord-v1.0.0": {
-      "properties": {
-        "control_number": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "participants": {
-          "type": "long"
-        },
-        "title": {
-          "type": "string",
-          "copy_to": "suggest_title"
-        },
-        "type": {
-          "type": "string"
-        },
-        "suggest_title": {
-          "type": "completion"
-        },
-        "file": {
-          "type": "attachment",
-          "fields": {
-            "content": {
-              "type": "string",
-              "term_vector": "with_positions_offsets",
-              "store":"yes"
+   "mappings":{
+      "testrecord-v1.0.0":{
+         "properties":{
+            "control_number":{
+               "type":"string"
             },
-            "author": {
-              "type": "string"
+            "description":{
+               "type":"string"
             },
-            "title": {
-                "type": "string"
-              },
-              "name": {
-              "type": "string"
+            "participants":{
+               "type":"long"
             },
-            "date": {
-              "type": "date",
-              "format": "strict_date_optional_time||epoch_millis"
+            "title":{
+               "type":"string",
+               "copy_to":"suggest_title"
             },
-            "keywords": {
-              "type": "string"
+            "type":{
+               "type":"string"
             },
-            "content_type": {
-              "type": "string"
+            "suggest_title":{
+               "type":"completion"
             },
-            "content_length": {
-              "type": "integer"
-            },
-            "language": {
-              "type": "string",
-              "store":"yes"
+            "_files":{
+               "properties":{
+                  "key":{
+                     "type":"string"
+                  },
+                  "bucket":{
+                     "type":"string"
+                  },
+                  "checksum":{
+                     "type":"string"
+                  },
+                  "size":{
+                     "type":"integer"
+                  },
+                  "version_id":{
+                     "type":"string"
+                  },
+                  "file":{
+                     "type":"attachment",
+                     "fields":{
+                        "content":{
+                           "type":"string",
+                           "term_vector":"with_positions_offsets",
+                           "store":"yes"
+                        },
+                        "author":{
+                           "type":"string"
+                        },
+                        "title":{
+                           "type":"string"
+                        },
+                        "name":{
+                           "type":"string"
+                        },
+                        "date":{
+                           "type":"date",
+                           "format":"strict_date_optional_time||epoch_millis"
+                        },
+                        "keywords":{
+                           "type":"string"
+                        },
+                        "content_type":{
+                           "type":"string"
+                        },
+                        "content_length":{
+                           "type":"integer"
+                        },
+                        "language":{
+                           "type":"string",
+                           "store":"yes"
+                        }
+                     }
+                  }
+               }
             }
-          }
-        },
-        "filename": {
-          "type": "string"
-        },
-        "insert_date": {
-          "type": "date",
-          "format": "strict_date_optional_time||epoch_millis"
-        }
+         }
       }
-    }
-  }
+   }
 }

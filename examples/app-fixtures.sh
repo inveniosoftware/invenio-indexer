@@ -12,6 +12,7 @@ cd $DIR
 export FLASK_APP=app.py
 
 # Load fixtures
+flask fixtures files
 flask fixtures records
 flask index reindex --yes-i-know
 flask index run
