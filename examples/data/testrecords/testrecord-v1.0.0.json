@@ -42,34 +42,31 @@
                      "type":"attachment",
                      "fields":{
                         "content":{
-                           "type":"string",
                            "term_vector":"with_positions_offsets",
                            "store":"yes"
                         },
                         "author":{
-                           "type":"string"
+                           "store": "yes"
                         },
                         "title":{
-                           "type":"string"
+                           "store": "yes"
                         },
                         "name":{
-                           "type":"string"
+                           "store": "yes"
                         },
                         "date":{
-                           "type":"date",
-                           "format":"strict_date_optional_time||epoch_millis"
+                           "store": "yes"
                         },
                         "keywords":{
-                           "type":"string"
+                           "store": "yes"
                         },
                         "content_type":{
-                           "type":"string"
+                           "store": "yes"
                         },
                         "content_length":{
-                           "type":"integer"
+                           "store": "yes"
                         },
                         "language":{
-                           "type":"string",
                            "store":"yes"
                         }
                      }
