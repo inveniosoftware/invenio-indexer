@@ -26,11 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
+import six
 from flask import current_app
 from werkzeug.utils import cached_property, import_string
 
 from . import config
 from .cli import run  # noqa
+from .signals import before_record_index
 
 
 class InvenioIndexer(object):
@@ -51,6 +53,12 @@ class InvenioIndexer(object):
         """
         self.init_config(app)
         app.extensions['invenio-indexer'] = self
+
+        hooks = app.config.get('INDEXER_BEFORE_INDEX_HOOKS', [])
+        for hook in hooks:
+            if isinstance(hook, six.string_types):
+                hook = import_string(hook)
+            before_record_index.connect_via(app)(hook)
 
     def init_config(self, app):
         """Initialize configuration.
