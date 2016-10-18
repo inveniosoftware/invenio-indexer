@@ -20,6 +20,49 @@
         },
         "suggest_title": {
           "type": "completion"
+        },
+        "file": {
+          "type": "attachment",
+          "fields": {
+            "content": {
+              "type": "string",
+              "term_vector": "with_positions_offsets",
+              "store":"yes"
+            },
+            "author": {
+              "type": "string"
+            },
+            "title": {
+                "type": "string"
+              },
+              "name": {
+              "type": "string"
+            },
+            "date": {
+              "type": "date",
+              "format": "strict_date_optional_time||epoch_millis"
+            },
+            "keywords": {
+              "type": "string"
+            },
+            "content_type": {
+              "type": "string"
+            },
+            "content_length": {
+              "type": "integer"
+            },
+            "language": {
+              "type": "string",
+              "store":"yes"
+            }
+          }
+        },
+        "filename": {
+          "type": "string"
+        },
+        "insert_date": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
         }
       }
     }
