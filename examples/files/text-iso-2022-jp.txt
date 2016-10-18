@@ -1,0 +1,2 @@
+Ceci est un texte ?crit en Fran?ais, et en ISO 2022-JP.
+ダウンロードが終わると、「発行元が確認できない...」といったメッセージが出ますが、

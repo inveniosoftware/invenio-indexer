@@ -1,0 +1,1 @@
+Ceci est un texte écrit en Français, et en UTF-8.
