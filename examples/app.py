@@ -148,26 +148,29 @@ def files():
     b1.id = '00000000-0000-0000-0000-000000000000'
     db.session.commit()
 
+test_file_folder = 'files'
+
 
 @fixtures.command()
 def records():
     """Load test data fixture."""
     bucket = Bucket.query.get('00000000-0000-0000-0000-000000000000')
     with db.session.begin_nested():
-        for idx in range(20):
+        for file_name in os.listdir(test_file_folder):
             # create the record
             record = Record.create({
-                'title': 'LHC experiment {}'.format(idx),
-                'description': 'Data from experiment {}.'.format(idx),
+                'title': file_name,
+                'description': file_name,
                 'type': 'data',
             })
 
             RecordsBuckets.create(bucket=bucket, record=record.model)
 
-            record.files["key"] = BytesIO(b'hello world')
+            record.files["key"] = open(os.path.join(
+                test_file_folder, file_name), 'rb')
             record.files["key"]['_index'] = {
-                "_indexed_chars": idx-1,
-                "_detect_language": "yes"
+                "_indexed_chars": -1,
+                "_detect_language": True
             }
             record['_files'] = record.files.dumps()
             record.commit()
