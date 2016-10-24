@@ -45,17 +45,17 @@ from invenio_indexer import InvenioIndexer
 
 
 @pytest.fixture()
-def app(request):
-    """Flask application fixture."""
+def base_app(request):
+    """Base application fixture."""
     instance_path = tempfile.mkdtemp()
     app = Flask('testapp', instance_path=instance_path)
     app.config.update(
         BROKER_URL=os.environ.get('BROKER_URL',
                                   'amqp://guest:guest@localhost:5672//'),
         CELERY_ALWAYS_EAGER=True,
-        CELERY_CACHE_BACKEND="memory",
+        CELERY_CACHE_BACKEND='memory',
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-        CELERY_RESULT_BACKEND="cache",
+        CELERY_RESULT_BACKEND='cache',
         INDEXER_DEFAULT_INDEX='records-default-v1.0.0',
         INDEXER_DEFAULT_DOC_TYPE='default-v1.0.0',
         SQLALCHEMY_DATABASE_URI=os.environ.get(
@@ -68,7 +68,6 @@ def app(request):
     InvenioRecords(app)
     search = InvenioSearch(app, entry_point_group=None)
     search.register_mappings('records', 'data')
-    InvenioIndexer(app)
 
     with app.app_context():
         if not database_exists(str(db.engine.url)):
@@ -82,6 +81,13 @@ def app(request):
 
     request.addfinalizer(teardown)
     return app
+
+
+@pytest.fixture()
+def app(base_app):
+    """Flask application fixture."""
+    InvenioIndexer(base_app)
+    return base_app
 
 
 @pytest.fixture()
