@@ -52,3 +52,6 @@ INDEXER_BULK_REQUEST_TIMEOUT = 10
 
 INDEXER_RECORD_TO_INDEX = 'invenio_indexer.utils.default_record_to_index'
 """Provide an implemetation of record_to_index function"""
+
+INDEXER_BEFORE_INDEX_HOOKS = []
+"""List of automatically connected hooks (function or importable string)."""
