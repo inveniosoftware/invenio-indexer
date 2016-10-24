@@ -64,7 +64,7 @@ install_requires = [
     'Flask>=0.11.1',
     'celery>=3.1.19',
     'invenio-records>=1.0.0a8',
-    'invenio-search>=1.0.0a4',
+    'invenio-search>=1.0.0a7',
     'pytz>=2016.4',
 ]
 
