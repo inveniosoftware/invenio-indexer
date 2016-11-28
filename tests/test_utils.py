@@ -53,7 +53,7 @@ def test_record_indexing(app, queue):
         current_search_client.indices.delete_alias('_all', '_all',
                                                    ignore=[400, 404])
         current_search_client.indices.delete('*')
-        aliases = current_search_client.indices.get_aliases()
+        aliases = current_search_client.indices.get_alias()
         assert 0 == len(aliases)
 
     runner = CliRunner()
