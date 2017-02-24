@@ -32,6 +32,7 @@ include .lgtm
 include LICENSE
 include MAINTAINERS
 include pytest.ini
+prune docs/_build
 recursive-include docs *.bat
 recursive-include docs *.py
 recursive-include docs *.rst
