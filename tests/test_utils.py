@@ -46,8 +46,11 @@ def test_record_indexing(app, queue):
         if '$schema' in json:
             del json['$schema']
 
-    models_committed.connect(process_models_committed_signal, sender=app)
-
+    with app.app_context():
+        # NOTE: We have to use `db.get_app()` because Flask-SQLAlchemy v2.2
+        # changed the way it picks a sender for the model signals.
+        models_committed.connect(process_models_committed_signal,
+                                 sender=db.get_app())
     with app.app_context():
 
         current_search_client.indices.delete_alias('_all', '_all',
@@ -85,7 +88,7 @@ def test_record_indexing(app, queue):
 
         record_indexer = RecordIndexer(queue=queue)
         result = record_indexer.process_bulk_queue()
-        assert 2 == len(list(result))
+        assert (2, 0) == result
 
         response = current_search_client.get(
             index='records-default-v1.0.0',
