@@ -47,7 +47,7 @@ tests_require = [
 
 extras_require = {
     'docs': [
-        'Sphinx>=1.4.4',
+        'Sphinx>=1.5.1'
     ],
     'tests': tests_require,
 }
@@ -119,6 +119,6 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
     ],
 )
