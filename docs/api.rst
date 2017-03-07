@@ -50,6 +50,9 @@ Celery tasks
 
 .. automodule:: invenio_indexer.tasks
    :members:
+.. autotask:: invenio_indexer.tasks.process_bulk_queue
+.. autotask:: invenio_indexer.tasks.index_record
+.. autotask:: invenio_indexer.tasks.delete_record
 
 
 Signals
