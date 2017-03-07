@@ -37,25 +37,30 @@ import pytest
 def example_app():
     """Example app fixture."""
     current_dir = os.getcwd()
-    # go to example directory
+
+    # Go to example directory
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     exampleappdir = os.path.join(project_dir, 'examples')
     os.chdir(exampleappdir)
-    # setup example
+
+    # Setup example
     cmd = './app-setup.sh'
     exit_status = subprocess.call(cmd, shell=True)
     assert exit_status == 0
-    # setup example
+
+    # Setup example
     cmd = './app-fixtures.sh'
     exit_status = subprocess.call(cmd, shell=True)
     assert exit_status == 0
     time.sleep(10)
-    # return webapp
+    # Return webapp
     yield exit_status
-    # tear down example app
+
+    # Tear down example app
     cmd = './app-teardown.sh'
     subprocess.call(cmd, shell=True)
-    # return to the original directory
+
+    # Return to the original directory
     os.chdir(current_dir)
 
 
