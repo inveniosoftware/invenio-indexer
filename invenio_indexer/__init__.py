@@ -108,7 +108,7 @@ single record indexing.
 
 Above will send the record id to a queue on your broker and wait for the bulk
 indexer to execute. This is normally done in the background by a Celery task
-which can be started from the command line like e.g.::
+which can be started from the command line like e.g.:
 
 .. code-block:: console
 

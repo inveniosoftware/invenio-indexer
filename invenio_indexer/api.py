@@ -44,7 +44,10 @@ from .signals import before_record_index
 
 
 class Producer(KombuProducer):
-    """Producer validating published messages."""
+    """Producer validating published messages.
+
+    For more information visit :class:`kombu:kombu.Producer`.
+    """
 
     def publish(self, data, **kwargs):
         """Validate operation type."""
