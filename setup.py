@@ -46,8 +46,12 @@ tests_require = [
 ]
 
 extras_require = {
+    'docs:python_version=="2.7"': [
+        # FIXME remove when celery#3993 will be resolved!
+        'celery>=3.1.16,<4.0.0',
+    ],
     'docs': [
-        'Sphinx>=1.5.1'
+        'Sphinx>=1.5.1,<1.6',
     ],
     'tests': tests_require,
 }

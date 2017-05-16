@@ -30,7 +30,7 @@ import copy
 from contextlib import contextmanager
 
 import pytz
-from celery.messaging import establish_connection
+from celery import current_app as current_celery_app
 from elasticsearch.helpers import bulk
 from flask import current_app
 from invenio_records.api import Record
@@ -181,7 +181,7 @@ class RecordIndexer(object):
 
     def process_bulk_queue(self):
         """Process bulk indexing queue."""
-        with establish_connection() as conn:
+        with current_celery_app.pool.acquire(block=True) as conn:
             consumer = Consumer(
                 connection=conn,
                 queue=self.mq_queue.name,
@@ -205,7 +205,7 @@ class RecordIndexer(object):
     @contextmanager
     def create_producer(self):
         """Context manager that yields an instance of ``Producer``."""
-        with establish_connection() as conn:
+        with current_celery_app.pool.acquire(block=True) as conn:
             yield Producer(
                 conn,
                 exchange=self.mq_exchange,
