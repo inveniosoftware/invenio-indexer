@@ -33,7 +33,7 @@ from .api import RecordIndexer
 
 
 def process_models_committed_signal(sender, changes):
-    """Handler for indexing record metadata.
+    """Handle the indexing of record metadata.
 
     :param sender: The signal sender.
     :param changes: The changes sent: a list of tuple (record, action).
@@ -60,7 +60,7 @@ def process_models_committed_signal(sender, changes):
 
 
 def default_record_to_index(record):
-    """Default function to get index/doc_type given a record.
+    """Get index/doc_type given a record.
 
     It tries to extract from `record['$schema']` the index and doc_type.
     If it fails, return the default values.
