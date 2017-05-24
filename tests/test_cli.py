@@ -27,12 +27,12 @@
 from __future__ import absolute_import, print_function
 
 import uuid
-from time import sleep
 
 from click.testing import CliRunner
 from invenio_db import db
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records import Record
-from invenio_search import current_search_client
+from invenio_search import current_search, current_search_client
 
 from invenio_indexer import cli
 from invenio_indexer.api import RecordIndexer
@@ -55,10 +55,32 @@ def test_reindex(app, script_info):
     # load records
     with app.test_request_context():
         runner = CliRunner()
-        rec_uuid = uuid.uuid4()
-        data = {'title': 'Test0'}
-        record = Record.create(data, id_=rec_uuid)
+
+        id1 = uuid.uuid4()
+        id2 = uuid.uuid4()
+        record1 = Record.create(dict(title='Test 1', recid=1), id_=id1)
+        record2 = Record.create(dict(title='Test 2', recid=2), id_=id2)
+        PersistentIdentifier.create(
+            pid_type='recid',
+            pid_value=1,
+            object_type='rec',
+            object_uuid=id1,
+            status=PIDStatus.REGISTERED,
+        )
+        PersistentIdentifier.create(
+            pid_type='recid',
+            pid_value=2,
+            object_type='rec',
+            object_uuid=id2,
+            status=PIDStatus.REGISTERED,
+        )
         db.session.commit()
+        indexer = RecordIndexer()
+        index, doc_type = indexer.record_to_index(record1)
+
+        # Make sure the index doesn't exist at the beginning (it was not
+        # preserved by accident from some other tests)
+        assert current_search_client.indices.exists(index) is False
 
         # Initialize queue
         res = runner.invoke(cli.queue, ['init', 'purge'],
@@ -69,15 +91,31 @@ def test_reindex(app, script_info):
         assert 0 == res.exit_code
         res = runner.invoke(cli.run, [], obj=script_info)
         assert 0 == res.exit_code
+        current_search.flush_and_refresh(index)
 
-        sleep(5)
-        indexer = RecordIndexer()
-        index, doc_type = indexer.record_to_index(record)
-        res = current_search_client.get(index=index, doc_type=doc_type,
-                                        id=rec_uuid)
-        assert res['found']
+        # Both records should be indexed
+        res = current_search_client.search(index=index)
+        assert res['hits']['total'] == 2
 
-        # Destroy queue
+        # Delete one of the records
+        record2 = Record.get_record(id2)
+        record2.delete()
+        db.session.commit()
+        # Destroy the index and reindex
+        list(current_search.delete(ignore=[404]))
+        res = runner.invoke(cli.reindex, ['--yes-i-know'], obj=script_info)
+        assert 0 == res.exit_code
+        res = runner.invoke(cli.run, [], obj=script_info)
+        assert 0 == res.exit_code
+        current_search.flush_and_refresh(index)
+
+        # Check that the deleted record is not indexed
+        res = current_search_client.search(index=index)
+        assert res['hits']['total'] == 1
+        assert res['hits']['hits'][0]['_source']['title'] == 'Test 1'
+
+        # Destroy queue and the index
         res = runner.invoke(cli.queue, ['delete'],
                             obj=script_info)
         assert 0 == res.exit_code
+        list(current_search.delete(ignore=[404]))

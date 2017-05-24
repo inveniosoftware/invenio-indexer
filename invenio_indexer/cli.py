@@ -30,7 +30,7 @@ import click
 from celery.messaging import establish_connection
 from flask import current_app
 from flask.cli import with_appcontext
-from invenio_records.models import RecordMetadata
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_search.cli import index
 
 from .api import RecordIndexer
@@ -69,19 +69,17 @@ def run(delayed, concurrency):
               prompt='Do you really want to reindex all records?')
 @with_appcontext
 def reindex():
-    """Reindex all records.
-
-    NOTE: Deleted records are not removed from the index.
-    """
+    """Reindex all records."""
     click.secho('Sending records to indexing queue ...', fg='green')
 
-    def records():
-        """Record iterator."""
-        for record in RecordMetadata.query.values(RecordMetadata.id):
-            yield record[0]
-
-    RecordIndexer().bulk_index(records())
-    click.secho('Execute "run" command to process the queue!', fg='yellow')
+    query = (x[0] for x in PersistentIdentifier.query.filter_by(
+        pid_type='recid', object_type='rec', status=PIDStatus.REGISTERED
+    ).values(
+        PersistentIdentifier.object_uuid
+    ))
+    RecordIndexer().bulk_index(query)
+    click.secho('Execute "run" command to process the queue!',
+                fg='yellow')
 
 
 @index.group(chain=True)

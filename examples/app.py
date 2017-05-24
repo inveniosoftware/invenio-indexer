@@ -53,10 +53,12 @@ To be able to uninstall the example app:
 from __future__ import absolute_import, print_function
 
 import os
+import uuid
 
 from flask import Flask
 from flask_celeryext import FlaskCeleryExt
 from invenio_db import InvenioDB, db
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records import InvenioRecords
 from invenio_records.api import Record
 from invenio_search import InvenioSearch
@@ -97,9 +99,19 @@ def records():
     with db.session.begin_nested():
         for idx in range(20):
             # create the record
+            id_ = uuid.uuid4()
             Record.create({
                 'title': 'LHC experiment {}'.format(idx),
                 'description': 'Data from experiment {}.'.format(idx),
                 'type': 'data',
-            })
+                'recid': idx
+            }, id_=id_)
+            PersistentIdentifier.create(
+                pid_type='recid',
+                pid_value=idx,
+                object_type='rec',
+                object_uuid=id_,
+                status=PIDStatus.REGISTERED,
+            )
+
     db.session.commit()
