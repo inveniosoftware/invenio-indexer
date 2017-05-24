@@ -13,5 +13,5 @@ export FLASK_APP=app.py
 
 # Load fixtures
 flask fixtures records
-flask index reindex --yes-i-know
+flask index reindex --yes-i-know -t recid
 flask index run

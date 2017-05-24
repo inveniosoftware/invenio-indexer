@@ -67,13 +67,19 @@ def run(delayed, concurrency):
 @click.option('--yes-i-know', is_flag=True, callback=abort_if_false,
               expose_value=False,
               prompt='Do you really want to reindex all records?')
+@click.option('-t', '--pid-type', multiple=True, required=True)
 @with_appcontext
-def reindex():
-    """Reindex all records."""
+def reindex(pid_type, ids=None):
+    """Reindex all records.
+
+    :param pid_type: Pid type.
+    """
     click.secho('Sending records to indexing queue ...', fg='green')
 
     query = (x[0] for x in PersistentIdentifier.query.filter_by(
-        pid_type='recid', object_type='rec', status=PIDStatus.REGISTERED
+        object_type='rec', status=PIDStatus.REGISTERED
+    ).filter(
+        PersistentIdentifier.pid_type.in_(pid_type)
     ).values(
         PersistentIdentifier.object_uuid
     ))

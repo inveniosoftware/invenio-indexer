@@ -87,7 +87,9 @@ def test_reindex(app, script_info):
                             obj=script_info)
         assert 0 == res.exit_code
 
-        res = runner.invoke(cli.reindex, ['--yes-i-know'], obj=script_info)
+        res = runner.invoke(cli.reindex,
+                            ['--yes-i-know', '-t', 'recid'],
+                            obj=script_info)
         assert 0 == res.exit_code
         res = runner.invoke(cli.run, [], obj=script_info)
         assert 0 == res.exit_code
@@ -103,7 +105,9 @@ def test_reindex(app, script_info):
         db.session.commit()
         # Destroy the index and reindex
         list(current_search.delete(ignore=[404]))
-        res = runner.invoke(cli.reindex, ['--yes-i-know'], obj=script_info)
+        res = runner.invoke(cli.reindex,
+                            ['--yes-i-know', '-t', 'recid'],
+                            obj=script_info)
         assert 0 == res.exit_code
         res = runner.invoke(cli.run, [], obj=script_info)
         assert 0 == res.exit_code
