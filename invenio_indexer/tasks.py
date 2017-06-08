@@ -32,12 +32,14 @@ from .api import RecordIndexer
 
 
 @shared_task(ignore_result=True)
-def process_bulk_queue():
+def process_bulk_queue(version_type=None):
     """Process bulk indexing queue.
+
+    :param version_type: Elasticsearch version type.
 
     Note: You can start multiple versions of this task.
     """
-    RecordIndexer().process_bulk_queue()
+    RecordIndexer(version_type=version_type).process_bulk_queue()
 
 
 @shared_task(ignore_result=True)

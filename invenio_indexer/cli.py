@@ -49,18 +49,19 @@ def abort_if_false(ctx, param, value):
 @click.option(
     '--concurrency', '-c', default=1, type=int,
     help='Number of concurrent indexing tasks to start.')
+@click.option('--version-type')
 @with_appcontext
-def run(delayed, concurrency):
+def run(delayed, concurrency, version_type=None):
     """Run bulk record indexing."""
     if delayed:
         click.secho(
             'Starting {0} tasks for indexing records...'.format(concurrency),
             fg='green')
         for c in range(0, concurrency):
-            process_bulk_queue.delay()
+            process_bulk_queue.delay(version_type=version_type)
     else:
         click.secho('Indexing records...', fg='green')
-        RecordIndexer().process_bulk_queue()
+        RecordIndexer(version_type=version_type).process_bulk_queue()
 
 
 @index.command()
@@ -69,7 +70,7 @@ def run(delayed, concurrency):
               prompt='Do you really want to reindex all records?')
 @click.option('-t', '--pid-type', multiple=True, required=True)
 @with_appcontext
-def reindex(pid_type, ids=None):
+def reindex(pid_type):
     """Reindex all records.
 
     :param pid_type: Pid type.
