@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2016 CERN.
+    Copyright (C) 2016, 2017 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -50,9 +50,9 @@ Celery tasks
 
 .. automodule:: invenio_indexer.tasks
    :members:
-.. autotask:: invenio_indexer.tasks.process_bulk_queue
-.. autotask:: invenio_indexer.tasks.index_record
-.. autotask:: invenio_indexer.tasks.delete_record
+.. autotask:: invenio_indexer.tasks.process_bulk_queue(version_type)
+.. autotask:: invenio_indexer.tasks.index_record(record_uuid)
+.. autotask:: invenio_indexer.tasks.delete_record(record_uuid)
 
 
 Signals
