@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2016 CERN.
+    Copyright (C) 2016, 2017 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -43,7 +43,5 @@ Invenio-Indexer
 
 Record indexer for Invenio.
 
-*This is an experimental developer preview release.*
-
-* Free software: GPLv2 license
-* Documentation: https://invenio-indexer.readthedocs.io/
+Further documentation is available on
+https://invenio-indexer.readthedocs.io/

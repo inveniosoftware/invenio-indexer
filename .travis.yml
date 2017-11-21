@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-
 notifications:
   email: false
 
@@ -30,9 +29,11 @@ sudo: false
 
 language: python
 
+matrix:
+  fast_finish: true
+
 cache:
-  directories:
-    - $HOME/.cache/pip
+  - pip
 
 services:
   - elasticsearch
@@ -42,27 +43,22 @@ services:
 env:
   - REQUIREMENTS=lowest BROKER_URL=redis://localhost:6379/0
   - REQUIREMENTS=lowest BROKER_URL=amqp://localhost:5672//
-  - REQUIREMENTS=release BROKER_URL=redis://localhost:6379/0
-  - REQUIREMENTS=release BROKER_URL=amqp://localhost:5672//
+  - REQUIREMENTS=release BROKER_URL=redis://localhost:6379/0 DEPLOY=true
+  - REQUIREMENTS=release BROKER_URL=amqp://localhost:5672// DEPLOY=true
   - REQUIREMENTS=devel BROKER_URL=redis://localhost:6379/0
   - REQUIREMENTS=devel BROKER_URL=amqp://localhost:5672//
 
 python:
   - "2.7"
   - "3.5"
-  - "pypy"
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - python: pypy
 
 before_install:
+  - "nvm install 6; nvm use 6"
   - "travis_retry pip install --upgrade pip setuptools py"
   - "travis_retry pip install twine wheel coveralls requirements-builder"
-  - "requirements-builder --level=min setup.py > .travis-lowest-requirements.txt"
-  - "requirements-builder --level=pypi setup.py > .travis-release-requirements.txt"
-  - "requirements-builder --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt"
+  - "requirements-builder -e all --level=min setup.py > .travis-lowest-requirements.txt"
+  - "requirements-builder -e all --level=pypi setup.py > .travis-release-requirements.txt"
+  - "requirements-builder -e all --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt"
 
 install:
   - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
@@ -76,10 +72,12 @@ after_success:
 
 deploy:
   provider: pypi
-  user: jirikuncar
+  user: inveniosoftware
   password:
-    secure: RiFRV2gRaV/7MLELON7vWdfP4wPJDzYNm/+LmbW9rshXJ3IbzstomoNN+QEPvPfaiFs8dKwwo2r7vWUCgGedTY3Rksi2+iSMojOb5VfQJWM+Gy8wP6OdzM8NmjRyYxluWEzJtUY1cyU/ss2M+iqGpZQLdQpTWZ8E+SHpznFP5dFt/MVHUcsW8TTToSK4gJtmREmCxnYG05jE8nS0othg9Qf6LvmaLkdMGNNMcoe2qcmmEWDApjUhYGjF1qHt1ScVukVUQGP8mhV+3086ndASx/Sl5hwbQHm1sJS9rjOhRGqXZvnaxZ6RyDlNNXo+PGeKLHD3ErYBIhPiXY49oLeqlo8Sm5iOKsif8Gi7eK9mXGWrEmXfsvabWlcsqUKdjQYaC5RHCcmAXgQ3yGY3INTRIrmnYhWzN/o1XBESwFUxqlSrANobMZPdHwt2JZJHMJL5GRB8msqsw3Pfq6KZ7Gv4xK/FwK5GGMwSBBhPk2/ewXlvbbZqgwGJueEFSYW8oSoobjViHLoB1TJMbL5gU5hsAezQgg8FCzqiNwx1108HW6GW4KNgAKTnXVAjyS+VUARe/HE9j6C/gK9vJbpPryHsVyLv33DCiFG2jDCrw9scq2H5LU4gtps1bBKfWtEkVOGsj3Hdcbi4C9HVwKpazoiaH38th0q47rpcRLkbZGtOwdQ=
+    secure: TODO:PYPISECUREHASH
+  distributions: "compile_catalog sdist bdist_wheel"
   on:
     tags: true
-    distributions: sdist bdist_wheel
+    python: "2.7"
     repo: inveniosoftware/invenio-indexer
+    condition: $DEPLOY = true
