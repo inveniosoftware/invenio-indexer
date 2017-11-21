@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,15 +22,13 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+"""Sphinx configuration."""
+
 from __future__ import print_function
 
 import os
-import sys
 
 import sphinx.environment
-
-# Plug example application into module path
-sys.path.append('examples')
 
 # -- General configuration ------------------------------------------------
 
@@ -82,7 +80,9 @@ author = u'CERN'
 
 # Get the version string. Cannot be done with import!
 g = {}
-with open(os.path.join('..', 'invenio_indexer', 'version.py'), 'rt') as fp:
+with open(os.path.join(os.path.dirname(__file__), '..',
+                       'invenio_indexer', 'version.py'),
+          'rt') as fp:
     exec(fp.read(), g)
     version = g['__version__']
 
@@ -138,15 +138,17 @@ todo_include_todos = False
 html_theme = 'alabaster'
 
 html_theme_options = {
-    'description': 'Record indexing for Invenio.',
+    'description': 'Record indexer for Invenio.',
     'github_user': 'inveniosoftware',
     'github_repo': 'invenio-indexer',
     'github_button': False,
     'github_banner': True,
     'show_powered_by': False,
     'extra_nav_links': {
-        'invenio-indexer@GitHub': 'https://github.com/inveniosoftware/invenio-indexer',
-        'invenio-indexer@PyPI': 'https://pypi.python.org/pypi/invenio-indexer/',
+        'invenio-indexer@GitHub':
+        'https://github.com/inveniosoftware/invenio-indexer',
+        'invenio-indexer@PyPI':
+        'https://pypi.python.org/pypi/invenio-indexer/',
     }
 }
 
@@ -273,8 +275,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'invenio-indexer.tex', u'invenio-indexer Documentation',
-   u'CERN', 'manual'),
+    (master_doc, 'invenio-indexer.tex', u'invenio-indexer Documentation',
+     u'CERN', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -317,9 +319,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'invenio-indexer', u'Invenio-Indexer Documentation',
-   author, 'invenio-indexer', 'Indexer for Invenio.',
-   'Miscellaneous'),
+    (master_doc, 'invenio-indexer', u'Invenio-Indexer Documentation',
+     author, 'invenio-indexer', 'Record indexer for Invenio.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.

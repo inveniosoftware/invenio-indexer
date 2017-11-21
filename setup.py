@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Indexer for Invenio."""
+"""Record indexer for Invenio.."""
 
 import os
 
@@ -64,8 +64,8 @@ setup_requires = [
 ]
 
 install_requires = [
-    'Flask>=0.11.1',
     'Flask-CeleryExt>=0.2.2',
+    'Flask>=0.11.1',
     'invenio-pidstore>=1.0.0b1',
     'invenio-records>=1.0.0a8',
     'invenio-search>=1.0.0a7',
@@ -122,7 +122,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 4 - Beta',
     ],
 )

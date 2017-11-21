@@ -1,15 +1,13 @@
-==========================
- Invenio-Indexer v1.0.0a10
-==========================
+=========================
+Invenio-Indexer v1.0.0a10
+=========================
 
 Invenio-Indexer v1.0.0a10 was released on June 9, 2017.
 
 About
 -----
 
-Indexer for Invenio.
-
-*This is an experimental developer preview release.*
+Record indexer for Invenio.
 
 What's new
 ----------
