@@ -21,9 +21,9 @@
     waive the privileges and immunities granted to it by virtue of its status
     as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-===============
-Invenio-Indexer
-===============
+=================
+ Invenio-Indexer
+=================
 
 .. image:: https://img.shields.io/travis/inveniosoftware/invenio-indexer.svg
         :target: https://travis-ci.org/inveniosoftware/invenio-indexer
