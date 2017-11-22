@@ -43,7 +43,7 @@ services:
 env:
   - REQUIREMENTS=lowest BROKER_URL=redis://localhost:6379/0
   - REQUIREMENTS=lowest BROKER_URL=amqp://localhost:5672//
-  - REQUIREMENTS=release BROKER_URL=redis://localhost:6379/0 DEPLOY=true
+  - REQUIREMENTS=release BROKER_URL=redis://localhost:6379/0
   - REQUIREMENTS=release BROKER_URL=amqp://localhost:5672// DEPLOY=true
   - REQUIREMENTS=devel BROKER_URL=redis://localhost:6379/0
   - REQUIREMENTS=devel BROKER_URL=amqp://localhost:5672//
