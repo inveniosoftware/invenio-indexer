@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -38,7 +38,7 @@ from jsonresolver.contrib.jsonref import json_loader_factory
 from kombu.compat import Consumer
 from mock import MagicMock, patch
 
-from invenio_indexer.api import RecordIndexer
+from invenio_indexer.api import BulkRecordIndexer, RecordIndexer
 from invenio_indexer.signals import before_record_index
 
 
@@ -233,3 +233,59 @@ def test_replace_refs(app):
         data = RecordIndexer._prepare_record(record, 'records', 'record')
         assert '$ref' not in data
         assert json.dumps(data)
+
+
+def test_bulkrecordindexer_index_delete_by_record_id(app, queue):
+    """Test utility class BulkRecordIndexer index/delete by record id."""
+    with app.app_context():
+        with establish_connection() as c:
+            indexer = BulkRecordIndexer()
+            id1 = uuid.uuid4()
+            indexer.index_by_id(id1)
+            indexer.delete_by_id(id1)
+
+            consumer = Consumer(
+                connection=c,
+                queue=indexer.mq_queue.name,
+                exchange=indexer.mq_exchange.name,
+                routing_key=indexer.mq_routing_key)
+
+            messages = list(consumer.iterqueue())
+            [m.ack() for m in messages]
+
+            assert len(messages) == 2
+            data0 = messages[0].decode()
+            assert data0['id'] == str(id1)
+            assert data0['op'] == 'index'
+            data1 = messages[1].decode()
+            assert data1['id'] == str(id1)
+            assert data1['op'] == 'delete'
+
+
+def test_bulkrecordindexer_index_delete_by_record(app, queue):
+    """Test utility class BulkRecordIndexer index/delete by record object."""
+    with app.app_context():
+        with establish_connection() as c:
+            recid = uuid.uuid4()
+            record = Record.create({'title': 'Test'}, id_=recid)
+            db.session.commit()
+            indexer = BulkRecordIndexer()
+            indexer.index(record)
+            indexer.delete(record)
+
+            consumer = Consumer(
+                connection=c,
+                queue=indexer.mq_queue.name,
+                exchange=indexer.mq_exchange.name,
+                routing_key=indexer.mq_routing_key)
+
+            messages = list(consumer.iterqueue())
+            [m.ack() for m in messages]
+
+            assert len(messages) == 2
+            data0 = messages[0].decode()
+            assert data0['id'] == str(recid)
+            assert data0['op'] == 'index'
+            data1 = messages[1].decode()
+            assert data1['id'] == str(recid)
+            assert data1['op'] == 'delete'

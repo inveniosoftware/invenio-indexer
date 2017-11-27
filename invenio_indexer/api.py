@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -321,3 +321,41 @@ class RecordIndexer(object):
         )
 
         return data
+
+
+class BulkRecordIndexer(RecordIndexer):
+    r"""Provide an interface for indexing records in Elasticsearch.
+
+    Uses bulk indexing by default.
+    """
+
+    def index(self, record):
+        """Index a record.
+
+        The caller is responsible for ensuring that the record has already been
+        committed to the database. If a newer version of a record has already
+        been indexed then the provided record will not be indexed. This
+        behavior can be controlled by providing a different ``version_type``
+        when initializing ``RecordIndexer``.
+
+        :param record: Record instance.
+        """
+        self.bulk_index([record.id])
+
+    def index_by_id(self, record_uuid):
+        """Index a record by record identifier.
+
+        :param record_uuid: Record identifier.
+        """
+        self.bulk_index([record_uuid])
+
+    def delete(self, record):
+        """Delete a record.
+
+        :param record: Record instance.
+        """
+        self.bulk_delete([record.id])
+
+    def delete_by_id(self, record_uuid):
+        """Delete record from index by record identifier."""
+        self.bulk_delete([record_uuid])
