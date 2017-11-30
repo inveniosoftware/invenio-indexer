@@ -34,7 +34,7 @@ history = open('CHANGES.rst').read()
 tests_require = [
     'check-manifest>=0.25',
     'coverage>=4.0',
-    'invenio-db[versioning]>=1.0.0a8',
+    'invenio-db[versioning]>=1.0.0b9',
     'isort>=4.2.2',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
@@ -45,12 +45,20 @@ tests_require = [
     'redis>=2.10.0',
 ]
 
+invenio_search_version = '1.0.0b2'
+
 extras_require = {
     'docs:python_version=="2.7"': [
         'celery>=3.1.16',
     ],
     'docs': [
         'Sphinx>=1.5.1,<1.6',
+    ],
+    'elasticsearch2': [
+        'invenio-search[elasticsearch2]>={}'.format(invenio_search_version),
+    ],
+    'elasticsearch5': [
+        'invenio-search[elasticsearch5]>={}'.format(invenio_search_version),
     ],
     'tests': tests_require,
 }
@@ -64,11 +72,10 @@ setup_requires = [
 ]
 
 install_requires = [
-    'Flask-CeleryExt>=0.2.2',
     'Flask>=0.11.1',
-    'invenio-pidstore>=1.0.0b1',
-    'invenio-records>=1.0.0a8',
-    'invenio-search>=1.0.0a7',
+    'Flask-CeleryExt>=0.3.0',
+    'invenio-pidstore>=1.0.0b2',
+    'invenio-records>=1.0.0b4',
     'pytz>=2016.4',
 ]
 
