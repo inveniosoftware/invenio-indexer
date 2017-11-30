@@ -60,7 +60,7 @@ def base_app(request):
         INDEXER_DEFAULT_DOC_TYPE='default-v1.0.0',
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
-        SQLALCHEMY_TRACK_MODIFICATIONS=True,
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
         TESTING=True,
     )
     FlaskCeleryExt(app)
