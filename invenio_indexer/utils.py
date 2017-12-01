@@ -25,38 +25,8 @@
 """Utility functions for data processing."""
 
 from flask import current_app
-from invenio_records.models import RecordMetadata
 from invenio_search import current_search
 from invenio_search.utils import schema_to_index
-
-from .api import RecordIndexer
-
-
-def process_models_committed_signal(sender, changes):
-    """Handle the indexing of record metadata.
-
-    :param sender: The signal sender.
-    :param changes: The changes sent: a list of tuple (record, action).
-    """
-    record_indexer = RecordIndexer()
-    op_map = {
-        'insert': 'index',
-        'update': 'index',
-        'delete': 'delete',
-    }
-    with record_indexer.create_producer() as producer:
-        for obj, change in changes:
-            if isinstance(obj, RecordMetadata):
-                if change in op_map:
-                    index, doc_type = record_indexer.record_to_index(
-                        obj.json or {}
-                    )
-                    producer.publish(dict(
-                        op=op_map[change],
-                        id=str(obj.id),
-                        index=index,
-                        doc_type=doc_type,
-                    ))
 
 
 def default_record_to_index(record):
