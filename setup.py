@@ -64,7 +64,9 @@ extras_require = {
 }
 
 extras_require['all'] = []
-for reqs in extras_require.values():
+for name, reqs in extras_require.items():
+    if name[0] == ':' or name in ('elasticsearch2', 'elasticsearch5'):
+        continue
     extras_require['all'].extend(reqs)
 
 setup_requires = [
