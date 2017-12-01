@@ -102,11 +102,22 @@ Would be indexed in the following Elasticsearch index/doctype:
 Bulk indexing
 -------------
 If you have many records to index, bulk indexing is far superior in speed to
-single record indexing.
+single record indexing. Bulk indexing requires the existence of a queue on your
+broker, so since this is the very first time we send any records for bulk
+indexing, we will have to create this queue:
+
+>>> from celery.messaging import establish_connection
+>>> queue = app.config['INDEXER_MQ_QUEUE']
+>>> with establish_connection() as conn:
+...     queue(conn).declare()
+'indexer'
+
+
+We can now send a record for bulk indexing:
 
 >>> indexer.bulk_index([str(r.id)])
 
-Above will send the record id to a queue on your broker and wait for the bulk
+Above will send the record id to the queue on your broker and wait for the bulk
 indexer to execute. This is normally done in the background by a Celery task
 which can be started from the command line like e.g.:
 
