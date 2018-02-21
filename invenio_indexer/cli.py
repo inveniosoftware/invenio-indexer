@@ -49,16 +49,25 @@ def abort_if_false(ctx, param, value):
 @click.option(
     '--concurrency', '-c', default=1, type=int,
     help='Number of concurrent indexing tasks to start.')
+@click.option('--queue', '-q', type=str,
+              help='Name of the celery queue used to put the tasks into.')
 @click.option('--version-type')
 @with_appcontext
-def run(delayed, concurrency, version_type=None):
+def run(delayed, concurrency, version_type=None, queue=None):
     """Run bulk record indexing."""
     if delayed:
         click.secho(
             'Starting {0} tasks for indexing records...'.format(concurrency),
             fg='green')
+        data = {
+            'kwargs': {
+                'version_type': version_type
+            }
+        }
+        if queue is not None:
+            data.update({'queue': queue})
         for c in range(0, concurrency):
-            process_bulk_queue.delay(version_type=version_type)
+            process_bulk_queue.apply_async(**data)
     else:
         click.secho('Indexing records...', fg='green')
         RecordIndexer(version_type=version_type).process_bulk_queue()
