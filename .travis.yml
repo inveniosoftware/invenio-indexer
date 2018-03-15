@@ -31,19 +31,20 @@ env:
   global:
     - ES2_DOWNLOAD_URL="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.2/elasticsearch-2.4.2.tar.gz"
     - ES5_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.4.tar.gz"
+    - ES6_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.0.tar.gz"
     - ES_HOST=127.0.0.1
   matrix:
+    # ES 6: Redis vs RabbitMQ
+    - REQUIREMENTS=release EXTRAS=all,elasticsearch6 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES6_DOWNLOAD_URL
+    - REQUIREMENTS=devel EXTRAS=all,elasticsearch6 BROKER_URL=amqp://localhost:5672// ES_URL=$ES6_DOWNLOAD_URL
     # ES 5: Redis vs RabbitMQ
     - REQUIREMENTS=lowest EXTRAS=all,elasticsearch5 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES5_DOWNLOAD_URL
     - REQUIREMENTS=lowest EXTRAS=all,elasticsearch5 BROKER_URL=amqp://localhost:5672// ES_URL=$ES5_DOWNLOAD_URL
     - REQUIREMENTS=release EXTRAS=all,elasticsearch5 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES5_DOWNLOAD_URL
     - REQUIREMENTS=release EXTRAS=all,elasticsearch5 BROKER_URL=amqp://localhost:5672// ES_URL=$ES5_DOWNLOAD_URL DEPLOY=true
-    - REQUIREMENTS=devel EXTRAS=all,elasticsearch5 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES5_DOWNLOAD_URL
-    - REQUIREMENTS=devel EXTRAS=all,elasticsearch5 BROKER_URL=amqp://localhost:5672// ES_URL=$ES5_DOWNLOAD_URL
     # ES 2: Redis only
     - REQUIREMENTS=lowest EXTRAS=all,elasticsearch2 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES2_DOWNLOAD_URL
     - REQUIREMENTS=release EXTRAS=all,elasticsearch2 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES2_DOWNLOAD_URL
-    - REQUIREMENTS=devel EXTRAS=all,elasticsearch2 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES2_DOWNLOAD_URL
 
 jdk:
   - "oraclejdk8"
