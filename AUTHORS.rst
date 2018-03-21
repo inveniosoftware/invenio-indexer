@@ -5,18 +5,22 @@
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
-Authors
-=======
+Contributors
+============
 
-Record indexer for Invenio.
-
-- Alizee Pace <alizee.pace@gmail.com>
-- CERN <info@inveniosoftware.org>
-- Javier Martin Montull <javier.martin.montull@cern.ch>
-- Jiri Kuncar <jiri.kuncar@cern.ch>
-- Krzysztof Nowak <k.nowak@cern.ch>
-- Lars Holm Nielsen <lars.holm.nielsen@cern.ch>
-- Leonardo Rossi <leonardo.r@cern.ch>
-- Nicolas Harraudeau <nicolas.harraudeau@cern.ch>
-- Salvatore Zaza <salvatore.zaza@gmail.com>
-- Tibor Simko <tibor.simko@cern.ch>
+- Alexander Ioannidis
+- Alizee Pace
+- Chiara Bigarella
+- Diego Rodriguez
+- Harris Tzovanakis
+- Javier Martin Montull
+- Jiri Kuncar
+- Krzysztof Nowak
+- Lars Holm Nielsen
+- Leonardo Rossi
+- Nicolas Harraudeau
+- Nikos Filippakis
+- Paulina Lach
+- Salvatore Zaza
+- Sebastian Witowski
+- Tibor Simko
