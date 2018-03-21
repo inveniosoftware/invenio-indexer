@@ -18,7 +18,7 @@ history = open('CHANGES.rst').read()
 tests_require = [
     'check-manifest>=0.25',
     'coverage>=4.0',
-    'invenio-db[versioning]>=1.0.0b9',
+    'invenio-db[versioning]>=1.0.0',
     'isort>=4.2.2',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
@@ -28,7 +28,7 @@ tests_require = [
     'redis>=2.10.0',
 ]
 
-invenio_search_version = '1.0.0b3'
+invenio_search_version = '1.0.0'
 
 extras_require = {
     'docs:python_version=="2.7"': [
@@ -62,8 +62,8 @@ setup_requires = [
 install_requires = [
     'Flask>=0.11.1',
     'Flask-CeleryExt>=0.3.0',
-    'invenio-pidstore>=1.0.0b2',
-    'invenio-records>=1.0.0b4',
+    'invenio-pidstore>=1.0.0',
+    'invenio-records>=1.0.0',
     'pytz>=2016.4',
 ]
 
@@ -117,6 +117,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
     ],
 )

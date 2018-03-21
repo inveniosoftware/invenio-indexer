@@ -12,7 +12,6 @@ include *.txt
 include .dockerignore
 include .editorconfig
 include LICENSE
-include MAINTAINERS
 include docs/requirements.txt
 include pytest.ini
 prune docs/_build
