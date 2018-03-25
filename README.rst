@@ -9,6 +9,9 @@
  Invenio-Indexer
 =================
 
+.. image:: https://img.shields.io/github/license/inveniosoftware/invenio-indexer.svg
+        :target: https://github.com/inveniosoftware/invenio-indexer/blob/master/LICENSE
+
 .. image:: https://img.shields.io/travis/inveniosoftware/invenio-indexer.svg
         :target: https://travis-ci.org/inveniosoftware/invenio-indexer
 
