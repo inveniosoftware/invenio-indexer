@@ -61,10 +61,10 @@ class RecordIndexer(object):
             from the record.
         """
         self.client = search_client or current_search_client
-        self._exchange = None
-        self._queue = None
+        self._exchange = exchange
+        self._queue = queue
         self._record_to_index = record_to_index or current_record_to_index
-        self._routing_key = None
+        self._routing_key = routing_key
         self._version_type = version_type or 'external_gte'
 
     def record_to_index(self, record):
