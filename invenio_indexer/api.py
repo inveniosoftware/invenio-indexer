@@ -163,8 +163,12 @@ class RecordIndexer(object):
         """
         self._bulk_op(record_id_iterator, 'delete')
 
-    def process_bulk_queue(self):
-        """Process bulk indexing queue."""
+    def process_bulk_queue(self, es_bulk_kwargs=None):
+        """Process bulk indexing queue.
+
+        :param dict es_bulk_kwargs: Passed to
+            :func:`elasticsearch:elasticsearch.helpers.bulk`.
+        """
         with current_celery_app.pool.acquire(block=True) as conn:
             consumer = Consumer(
                 connection=conn,
@@ -175,11 +179,13 @@ class RecordIndexer(object):
 
             req_timeout = current_app.config['INDEXER_BULK_REQUEST_TIMEOUT']
 
+            es_bulk_kwargs = es_bulk_kwargs or {}
             count = bulk(
                 self.client,
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
                 request_timeout=req_timeout,
+                **es_bulk_kwargs
             )
 
             consumer.close()

@@ -35,26 +35,32 @@ def abort_if_false(ctx, param, value):
     help='Number of concurrent indexing tasks to start.')
 @click.option('--queue', '-q', type=str,
               help='Name of the celery queue used to put the tasks into.')
-@click.option('--version-type')
+@click.option('--version-type', help='Elasticsearch version type to use.')
+@click.option(
+    '--raise-on-error/--skip-errors', default=True,
+    help='Controls if Elasticsearch bulk indexing errors raise an exception.')
 @with_appcontext
-def run(delayed, concurrency, version_type=None, queue=None):
+def run(delayed, concurrency, version_type=None, queue=None,
+        raise_on_error=True):
     """Run bulk record indexing."""
     if delayed:
+        celery_kwargs = {
+            'kwargs': {
+                'version_type': version_type,
+                'es_bulk_kwargs': {'raise_on_error': raise_on_error},
+            }
+        }
         click.secho(
             'Starting {0} tasks for indexing records...'.format(concurrency),
             fg='green')
-        data = {
-            'kwargs': {
-                'version_type': version_type
-            }
-        }
         if queue is not None:
-            data.update({'queue': queue})
+            celery_kwargs.update({'queue': queue})
         for c in range(0, concurrency):
-            process_bulk_queue.apply_async(**data)
+            process_bulk_queue.apply_async(**celery_kwargs)
     else:
         click.secho('Indexing records...', fg='green')
-        RecordIndexer(version_type=version_type).process_bulk_queue()
+        RecordIndexer(version_type=version_type).process_bulk_queue(
+            es_bulk_kwargs={'raise_on_error': raise_on_error})
 
 
 @index.command()

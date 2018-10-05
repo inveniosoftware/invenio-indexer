@@ -325,6 +325,8 @@ texinfo_documents = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'kombu': ('http://docs.celeryproject.org/projects/kombu/en/latest/', None),
+    'elasticsearch': (
+        'https://elasticsearch-py.readthedocs.io/en/master/', None),
 }
 # Autodoc configuraton.
 autoclass_content = 'both'
