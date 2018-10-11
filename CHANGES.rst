@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.0.1 (released 2018-10-11)
+
+- Allow forwarding arguments from ``RecordIndexer.process_bulk_queue`` to
+  ``elasticsearch.helpers.bulk`` calls via the ``es_bulk_kwargs`` parameter.
+
 Version 1.0.0 (released 2018-03-23)
 
 - Initial public release.
