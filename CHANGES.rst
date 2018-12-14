@@ -7,6 +7,10 @@
 
 Changes
 =======
+Version 1.0.2 (released 2019-05-27)
+
+- Allow Elasticsearch indexing arguments to be modified by subscribing to
+  ``before_record_index`` signal.
 
 Version 1.0.1 (released 2018-10-11)
 
