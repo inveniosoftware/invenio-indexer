@@ -7,6 +7,9 @@
 
 Changes
 =======
+Version 1.0.2 (released 2018-12-14)
+
+- Pinned Redis to v2
 
 Version 1.0.1 (released 2018-10-11)
 
