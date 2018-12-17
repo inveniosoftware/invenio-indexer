@@ -65,7 +65,6 @@ install_requires = [
     'invenio-pidstore>=1.0.0',
     'invenio-records>=1.0.0',
     'pytz>=2016.4',
-    'redis>=2.10.0,<3.0.0',
 ]
 
 packages = find_packages()
