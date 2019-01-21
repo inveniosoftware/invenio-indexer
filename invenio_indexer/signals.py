@@ -25,3 +25,16 @@ provided:
 - ``index``: The index in which the record will be indexed.
 - ``doc_type``: The doc_type for the record.
 """
+
+before_record_index_arguments = _signals.signal('before-record-index-args')
+"""Signal sent before a record is indexed.
+
+The sender is the current Flask application, and two keyword arguments are
+provided:
+
+- ``json``: The dumped record dictionary which can be modified.
+- ``record``: The record being indexed.
+- ``index``: The index in which the record will be indexed.
+- ``doc_type``: The doc_type for the record.
+- ``**kwargs``: Extra arguments.
+"""

@@ -24,7 +24,7 @@ from kombu.compat import Consumer
 from sqlalchemy.orm.exc import NoResultFound
 
 from .proxies import current_record_to_index
-from .signals import before_record_index
+from .signals import before_record_index, before_record_index_arguments
 
 
 class Producer(KombuProducer):
@@ -103,7 +103,7 @@ class RecordIndexer(object):
     #
     # High-level API
     #
-    def index(self, record):
+    def index(self, record, **kwargs):
         """Index a record.
 
         The caller is responsible for ensuring that the record has already been
@@ -116,13 +116,18 @@ class RecordIndexer(object):
         """
         index, doc_type = self.record_to_index(record)
 
+        body = self._prepare_record(record, index, doc_type)
+
+        arguments = self._prepare_arguments(record, index, doc_type, **kwargs)
+
         return self.client.index(
             id=str(record.id),
             version=record.revision_id,
             version_type=self._version_type,
             index=index,
             doc_type=doc_type,
-            body=self._prepare_record(record, index, doc_type),
+            body=body,
+            **arguments
         )
 
     def index_by_id(self, record_uuid):
@@ -311,6 +316,41 @@ class RecordIndexer(object):
         )
 
         return data
+
+    @staticmethod
+    def _prepare_arguments(record, index, doc_type, **kwargs):
+        """Prepare arguments for indexing.
+
+        :param record: The record to prepare.
+        :param index: The Elasticsearch index.
+        :param doc_type: The Elasticsearch document type.
+        :param **kwargs: Extra parameters.
+        :returns: The arguments for Elasticsearch.
+        """
+        if current_app.config['INDEXER_REPLACE_REFS']:
+            data = copy.deepcopy(record.replace_refs())
+        else:
+            data = record.dumps()
+
+        data['_created'] = pytz.utc.localize(record.created).isoformat() \
+            if record.created else None
+        data['_updated'] = pytz.utc.localize(record.updated).isoformat() \
+            if record.updated else None
+
+        arguments = {}
+
+        # Allow modification of arguments prior to sending to Elasticsearch.
+        before_record_index_arguments.send(
+            current_app._get_current_object(),
+            json=data,
+            record=record,
+            index=index,
+            doc_type=doc_type,
+            arguments=arguments,
+            **kwargs
+        )
+
+        return arguments
 
 
 class BulkRecordIndexer(RecordIndexer):
