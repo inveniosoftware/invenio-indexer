@@ -24,4 +24,6 @@ provided:
 - ``record``: The record being indexed.
 - ``index``: The index in which the record will be indexed.
 - ``doc_type``: The doc_type for the record.
+- ``arguments``: The arguments to pass to Elasticsearch for indexing.
+- ``**kwargs``: Extra arguments.
 """

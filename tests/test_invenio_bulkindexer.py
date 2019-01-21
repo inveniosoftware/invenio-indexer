@@ -65,6 +65,7 @@ def test_hook_initialization(base_app):
         kwargs = dict(
             index=app.config['INDEXER_DEFAULT_INDEX'],
             doc_type=app.config['INDEXER_DEFAULT_DOC_TYPE'],
+            arguments={},
             record=record,
             json={
                 'title': 'Test',

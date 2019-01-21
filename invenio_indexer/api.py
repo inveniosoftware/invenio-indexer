@@ -103,7 +103,7 @@ class RecordIndexer(object):
     #
     # High-level API
     #
-    def index(self, record):
+    def index(self, record, arguments=None, **kwargs):
         """Index a record.
 
         The caller is responsible for ensuring that the record has already been
@@ -115,6 +115,9 @@ class RecordIndexer(object):
         :param record: Record instance.
         """
         index, doc_type = self.record_to_index(record)
+        arguments = arguments or {}
+        body = self._prepare_record(
+            record, index, doc_type, arguments, **kwargs)
 
         return self.client.index(
             id=str(record.id),
@@ -122,20 +125,24 @@ class RecordIndexer(object):
             version_type=self._version_type,
             index=index,
             doc_type=doc_type,
-            body=self._prepare_record(record, index, doc_type),
+            body=body,
+            **arguments
         )
 
-    def index_by_id(self, record_uuid):
+    def index_by_id(self, record_uuid, **kwargs):
         """Index a record by record identifier.
 
         :param record_uuid: Record identifier.
+        :param kwargs: Passed to :meth:`RecordIndexer.index`.
         """
-        return self.index(Record.get_record(record_uuid))
+        return self.index(Record.get_record(record_uuid), **kwargs)
 
-    def delete(self, record):
+    def delete(self, record, **kwargs):
         """Delete a record.
 
         :param record: Record instance.
+        :param kwargs: Passed to
+            :meth:`elasticsearch:elasticsearch.Elasticsearch.delete`.
         """
         index, doc_type = self.record_to_index(record)
 
@@ -143,11 +150,16 @@ class RecordIndexer(object):
             id=str(record.id),
             index=index,
             doc_type=doc_type,
+            **kwargs
         )
 
-    def delete_by_id(self, record_uuid):
-        """Delete record from index by record identifier."""
-        self.delete(Record.get_record(record_uuid))
+    def delete_by_id(self, record_uuid, **kwargs):
+        """Delete record from index by record identifier.
+
+        :param record_uuid: Record identifier.
+        :param kwargs: Passed to :meth:`RecordIndexer.delete`.
+        """
+        self.delete(Record.get_record(record_uuid), **kwargs)
 
     def bulk_index(self, record_id_iterator):
         """Bulk index records.
@@ -272,23 +284,31 @@ class RecordIndexer(object):
         record = Record.get_record(payload['id'])
         index, doc_type = self.record_to_index(record)
 
-        return {
+        arguments = {}
+        body = self._prepare_record(record, index, doc_type, arguments)
+
+        action = {
             '_op_type': 'index',
             '_index': index,
             '_type': doc_type,
             '_id': str(record.id),
             '_version': record.revision_id,
             '_version_type': self._version_type,
-            '_source': self._prepare_record(record, index, doc_type),
+            '_source': body
         }
+        action.update(arguments)
+
+        return action
 
     @staticmethod
-    def _prepare_record(record, index, doc_type):
+    def _prepare_record(record, index, doc_type, arguments=None, **kwargs):
         """Prepare record data for indexing.
 
         :param record: The record to prepare.
         :param index: The Elasticsearch index.
         :param doc_type: The Elasticsearch document type.
+        :param arguments: The arguments to send to Elasticsearch upon indexing.
+        :param **kwargs: Extra parameters.
         :returns: The record metadata.
         """
         if current_app.config['INDEXER_REPLACE_REFS']:
@@ -308,6 +328,8 @@ class RecordIndexer(object):
             record=record,
             index=index,
             doc_type=doc_type,
+            arguments={} if arguments is None else arguments,
+            **kwargs
         )
 
         return data

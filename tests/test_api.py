@@ -83,8 +83,9 @@ def test_index_action(app):
         record = Record.create({'title': 'Test'})
         db.session.commit()
 
-        def receiver(sender, json=None, record=None, **kwargs):
+        def receiver(sender, json=None, record=None, arguments=None, **kwargs):
             json['extra'] = 'extra'
+            arguments['pipeline'] = 'foobar'
 
         with before_record_index.connected_to(receiver):
             action = RecordIndexer()._index_action(dict(
@@ -97,6 +98,7 @@ def test_index_action(app):
             assert action['_id'] == str(record.id)
             assert action['_version'] == record.revision_id
             assert action['_version_type'] == 'external_gte'
+            assert action['pipeline'] == 'foobar'
             assert 'title' in action['_source']
             assert 'extra' in action['_source']
 
@@ -159,7 +161,7 @@ def test_index(app):
 
         client_mock = MagicMock()
         RecordIndexer(search_client=client_mock, version_type='force').index(
-            record)
+            record, arguments={'pipeline': 'foobar'})
 
         client_mock.index.assert_called_with(
             id=str(recid),
@@ -172,6 +174,7 @@ def test_index(app):
                 '_created': pytz.utc.localize(record.created).isoformat(),
                 '_updated': pytz.utc.localize(record.updated).isoformat(),
             },
+            pipeline='foobar',
         )
 
         with patch('invenio_indexer.api.RecordIndexer.index') as fun:
