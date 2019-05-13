@@ -16,6 +16,7 @@ readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
 
 tests_require = [
+    'attrs>=17.4.0',
     'check-manifest>=0.25',
     'coverage>=4.0',
     'invenio-db[versioning]>=1.0.0',
