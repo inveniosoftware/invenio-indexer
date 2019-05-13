@@ -174,8 +174,7 @@ extension's ``init_app`` method):
 from __future__ import absolute_import, print_function
 
 from .ext import InvenioIndexer
-from .version import __version__
-
 from .proxies import current_record_to_index
+from .version import __version__
 
 __all__ = ('__version__', 'InvenioIndexer', 'current_record_to_index')
