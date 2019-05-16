@@ -80,8 +80,7 @@ E.g. the following record:
 
 Would be indexed in the following Elasticsearch index/doctype:
 
->>> print(indexer.record_to_index(record))
-('records-record-v1.0.0', 'record-v1.0.0')
+>>> index, doc_type = indexer.record_to_index(record)
 
 Bulk indexing
 -------------

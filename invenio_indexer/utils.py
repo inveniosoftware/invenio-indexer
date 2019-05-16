@@ -8,6 +8,9 @@
 
 """Utility functions for data processing."""
 
+from functools import wraps
+
+from elasticsearch import VERSION as ES_VERSION
 from flask import current_app
 from invenio_search import current_search
 from invenio_search.utils import schema_to_index
@@ -29,8 +32,48 @@ def default_record_to_index(record):
 
     index, doc_type = schema_to_index(schema, index_names=index_names)
 
-    if index and doc_type:
-        return index, doc_type
-    else:
-        return (current_app.config['INDEXER_DEFAULT_INDEX'],
-                current_app.config['INDEXER_DEFAULT_DOC_TYPE'])
+    if not (index and doc_type):
+        index, doc_type = (current_app.config['INDEXER_DEFAULT_INDEX'],
+                           current_app.config['INDEXER_DEFAULT_DOC_TYPE'])
+
+    if ES_VERSION[0] >= 7:
+        doc_type = '_doc'
+
+    return index, doc_type
+
+
+def es_bulk_param_compatibility(f):
+    """Decorator to ensure parameter compatibility.
+
+    ES version 7 removed deprecated params for bulk indexing which are modified
+    by this decorator.
+    """
+    removed_params = (
+        'opType',
+        'versionType',
+        '_versionType',
+        '_parent',
+        '_retry_on_conflict',
+        '_routing',
+        '_version',
+        '_version_type'
+    )
+
+    def update_params(obj, from_key, to_key):
+        if from_key in obj:
+            obj[to_key] = obj[from_key]
+            del obj[from_key]
+
+    @wraps(f)
+    def inner(*args, **kwargs):
+        action = f(*args, **kwargs)
+        if isinstance(action, dict) and ES_VERSION[0] >= 7:
+            for param in removed_params:
+                if param == 'opType':
+                    update_params(action, 'opType', 'op_type')
+                elif param in ('versionType', '_versionType'):
+                    update_params(action, param, 'version_type')
+                else:
+                    update_params(action, param, param[1:])
+        return action
+    return inner

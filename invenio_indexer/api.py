@@ -25,6 +25,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from .proxies import current_record_to_index
 from .signals import before_record_index
+from .utils import es_bulk_param_compatibility
 
 
 class Producer(KombuProducer):
@@ -275,6 +276,7 @@ class RecordIndexer(object):
             '_id': payload['id'],
         }
 
+    @es_bulk_param_compatibility
     def _index_action(self, payload):
         """Bulk index action.
 

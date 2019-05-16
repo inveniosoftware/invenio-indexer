@@ -13,6 +13,7 @@ from __future__ import absolute_import, print_function
 import uuid
 
 import pytz
+from elasticsearch import VERSION as ES_VERSION
 from flask import Flask
 from invenio_db import db
 from invenio_records import Record
@@ -23,6 +24,8 @@ from invenio_indexer.api import RecordIndexer
 
 _global_magic_hook = MagicMock()
 """Iternal importable magic hook instance."""
+
+lt_es7 = ES_VERSION[0] < 7
 
 
 def test_version():
@@ -62,9 +65,10 @@ def test_hook_initialization(base_app):
         RecordIndexer(search_client=client_mock, version_type='force').index(
             record)
         args = (app, )
+        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else '_doc'
         kwargs = dict(
             index=app.config['INDEXER_DEFAULT_INDEX'],
-            doc_type=app.config['INDEXER_DEFAULT_DOC_TYPE'],
+            doc_type=doc_type,
             arguments={},
             record=record,
             json={
@@ -80,7 +84,7 @@ def test_hook_initialization(base_app):
             version=0,
             version_type='force',
             index=app.config['INDEXER_DEFAULT_INDEX'],
-            doc_type=app.config['INDEXER_DEFAULT_DOC_TYPE'],
+            doc_type=doc_type,
             body={
                 'title': 'Test',
                 '_created': pytz.utc.localize(record.created).isoformat(),

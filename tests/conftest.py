@@ -26,6 +26,7 @@ from sqlalchemy_utils.functions import create_database, database_exists, \
     drop_database
 
 from invenio_indexer import InvenioIndexer
+from invenio_indexer.utils import es_bulk_param_compatibility
 
 
 @pytest.fixture()
@@ -92,3 +93,12 @@ def queue(app):
             q.purge()
 
     return queue
+
+
+@pytest.fixture()
+def generate_action():
+    """Generate action function to test bulk param decorator."""
+    @es_bulk_param_compatibility
+    def inner(action):
+        return action
+    return inner

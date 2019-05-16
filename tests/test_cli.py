@@ -81,7 +81,7 @@ def test_reindex(app, script_info):
 
         # Both records should be indexed
         res = current_search_client.search(index=index)
-        assert res['hits']['total'] == 2
+        assert len(res['hits']['hits']) == 2
 
         # Delete one of the records
         record2 = Record.get_record(id2)
@@ -99,7 +99,7 @@ def test_reindex(app, script_info):
 
         # Check that the deleted record is not indexed
         res = current_search_client.search(index=index)
-        assert res['hits']['total'] == 1
+        assert len(res['hits']['hits']) == 1
         assert res['hits']['hits'][0]['_source']['title'] == 'Test 1'
 
         # Destroy queue and the index
