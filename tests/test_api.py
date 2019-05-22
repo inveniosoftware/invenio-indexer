@@ -68,16 +68,32 @@ def test_delete_action(app):
         assert action['_type'] == 'doc'
         assert action['_id'] == testid
 
-        with patch('invenio_indexer.api.Record.get_record') as r:
-            r.return_value = {'$schema': {
-                '$ref': '/records/authorities/authority-v1.0.0.json'
-            }}
-            action = RecordIndexer()._delete_action(
-                dict(id='myid', op='delete', index=None, doc_type=None))
-            assert action['_op_type'] == 'delete'
-            assert action['_index'] == 'records-authorities-authority-v1.0.0'
-            assert action['_type'] == 'authority-v1.0.0' if lt_es7 else '_doc'
-            assert action['_id'] == 'myid'
+        # Skip JSONSchema validation
+        with patch('invenio_records.api.Record.validate'):
+            record = Record.create({
+                '$schema': {
+                    '$ref': '/records/authorities/authority-v1.0.0.json'},
+                'title': 'Test',
+            })
+            db.session.commit()
+        action = RecordIndexer()._delete_action(
+            dict(id=str(record.id), op='delete', index=None, doc_type=None))
+        assert action['_op_type'] == 'delete'
+        assert action['_index'] == 'records-authorities-authority-v1.0.0'
+        assert action['_type'] == 'authority-v1.0.0' if lt_es7 else '_doc'
+        assert action['_id'] == str(record.id)
+
+        record.delete()
+        db.session.commit()
+        action = RecordIndexer()._delete_action(
+            dict(id=str(record.id), op='delete', index=None, doc_type=None))
+        assert action['_op_type'] == 'delete'
+        # Deleted record doesn't have '$schema', so index and doc type cannot
+        # be determined, resulting to the defaults from config
+        assert action['_index'] == app.config['INDEXER_DEFAULT_INDEX']
+        assert action['_type'] == \
+            app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else '_doc'
+        assert action['_id'] == str(record.id)
 
 
 def test_index_action(app):
