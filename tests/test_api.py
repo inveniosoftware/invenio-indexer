@@ -303,3 +303,43 @@ def test_bulkrecordindexer_index_delete_by_record(app, queue):
             data1 = messages[1].decode()
             assert data1['id'] == str(recid)
             assert data1['op'] == 'delete'
+
+
+def test_before_record_index_dynamic_connect(app):
+    """Test before_record_index.dynamic_connect."""
+    with app.app_context():
+        with patch('invenio_records.api.Record.validate'):
+            auth_record = Record.create({
+                '$schema': '/records/authorities/authority-v1.0.0.json',
+                'title': 'Test'})
+            bib_record = Record.create({
+                '$schema': '/records/bibliographic/bibliographic-v1.0.0.json',
+                'title': 'Test'})
+            db.session.commit()
+
+        def _simple(sender, json=None, **kwargs):
+            json['simple'] = 'simple'
+
+        def _custom(sender, json=None, **kwargs):
+            json['custom'] = 'custom'
+
+        def _cond(sender, connect_kwargs, index=None, **kwargs):
+            return 'bibliographic' in index
+
+        _receiver1 = before_record_index.dynamic_connect(
+            _simple, index='records-authorities-authority-v1.0.0')
+        _receiver2 = before_record_index.dynamic_connect(
+            _custom, condition_func=_cond)
+
+        action = RecordIndexer()._index_action(
+            dict(id=str(auth_record.id), op='index'))
+        assert 'title' in action['_source']
+        assert action['_source']['simple'] == 'simple'
+
+        action = RecordIndexer()._index_action(dict(
+            id=str(bib_record.id), index='foo', op='index'))
+        assert 'title' in action['_source']
+        assert action['_source']['custom'] == 'custom'
+
+        before_record_index.disconnect(_receiver1)
+        before_record_index.disconnect(_receiver2)
