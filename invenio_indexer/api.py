@@ -19,6 +19,7 @@ from elasticsearch.helpers import bulk
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
+from invenio_search.utils import build_alias_name
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
 from sqlalchemy.orm.exc import NoResultFound
@@ -119,6 +120,7 @@ class RecordIndexer(object):
         arguments = arguments or {}
         body = self._prepare_record(
             record, index, doc_type, arguments, **kwargs)
+        index, doc_type = self._prepare_index(index, doc_type)
 
         return self.client.index(
             id=str(record.id),
@@ -146,6 +148,7 @@ class RecordIndexer(object):
             :meth:`elasticsearch:elasticsearch.Elasticsearch.delete`.
         """
         index, doc_type = self.record_to_index(record)
+        index, doc_type = self._prepare_index(index, doc_type)
 
         return self.client.delete(
             id=str(record.id),
@@ -268,6 +271,7 @@ class RecordIndexer(object):
         if not (index and doc_type):
             record = Record.get_record(payload['id'], with_deleted=True)
             index, doc_type = self.record_to_index(record)
+        index, doc_type = self._prepare_index(index, doc_type)
 
         return {
             '_op_type': 'delete',
@@ -288,6 +292,7 @@ class RecordIndexer(object):
 
         arguments = {}
         body = self._prepare_record(record, index, doc_type, arguments)
+        index, doc_type = self._prepare_index(index, doc_type)
 
         action = {
             '_op_type': 'index',
@@ -301,6 +306,10 @@ class RecordIndexer(object):
         action.update(arguments)
 
         return action
+
+    def _prepare_index(self, index, doc_type):
+        """Prepare the index/doc_type before an operation."""
+        return build_alias_name(index), doc_type
 
     @staticmethod
     def _prepare_record(record, index, doc_type, arguments=None, **kwargs):
