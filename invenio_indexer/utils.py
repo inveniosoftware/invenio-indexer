@@ -8,12 +8,41 @@
 
 """Utility functions for data processing."""
 
+import os
 from functools import wraps
 
 from elasticsearch import VERSION as ES_VERSION
 from flask import current_app
 from invenio_search import current_search
-from invenio_search.utils import schema_to_index
+from invenio_search.utils import build_index_from_parts
+
+
+def schema_to_index(schema, index_names=None):
+    """Get index/doc_type given a schema URL.
+
+    :param schema: The schema name
+    :param index_names: A list of index name.
+    :returns: A tuple containing (index, doc_type).
+    """
+    parts = schema.split('/')
+    doc_type, ext = os.path.splitext(parts[-1])
+    parts[-1] = doc_type
+    if ES_VERSION[0] >= 7:
+        doc_type = '_doc'
+
+    if ext not in {'.json', }:
+        return (None, None)
+
+    if index_names is None:
+        index = build_index_from_parts(*parts)
+        return index, doc_type
+
+    for start in range(len(parts)):
+        name = build_index_from_parts(*parts[start:])
+        if name in index_names:
+            return name, doc_type
+
+    return (None, None)
 
 
 def default_record_to_index(record):
