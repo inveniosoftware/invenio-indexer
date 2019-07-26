@@ -23,9 +23,9 @@ First create a Flask application:
 >>> app = Flask('myapp')
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 
-You initialize Indexer like a normal Flask extension, however
-Invenio-Indexer is dependent on Invenio-Records and Invenio-Search so you
-need to initialize these extensions first:
+You initialize Indexer like a normal Flask extension, however Invenio-Indexer
+is dependent on Invenio-Records and Invenio-Search so you need to initialize
+these extensions first:
 
 >>> from invenio_db import InvenioDB
 >>> ext_db = InvenioDB(app)
@@ -39,8 +39,8 @@ We now initialize Invenio-Indexer:
 >>> from invenio_indexer import InvenioIndexer
 >>> ext_indexer = InvenioIndexer(app)
 
-In order for the following examples to work, you need to work within an
-Flask application context so let's push one:
+In order for the following examples to work, you need to work within an Flask
+application context so let's push one:
 
 >>> ctx = app.app_context()
 >>> ctx.push()
@@ -61,8 +61,8 @@ Let's start by creating a record that we would like to index:
 >>> record = Record.create({'title': 'A test'})
 >>> db.session.commit()
 
-Note, that you are responsible for ensuring that the record is committed to
-the  database, prior to sending it for indexing.
+Note, that you are responsible for ensuring that the record is committed to the
+database, prior to sending it for indexing.
 
 Now, let's index the record:
 
@@ -71,9 +71,9 @@ Now, let's index the record:
 >>> res = indexer.index(record)
 
 By default, records are sent to the Elasticsearch index defined by the
-configuration variable ``INDEXER_DEFAULT_INDEX``. If the record however
-has a ``$schema`` attribute, the index is automatically determined from this.
-E.g. the following record:
+configuration variable ``INDEXER_DEFAULT_INDEX``. If the record however has a
+``$schema`` attribute, the index is automatically determined from this. E.g.
+the following record:
 
 >>> r = Record({
 ...     '$schema': 'http://example.org/records/record-v1.0.0.json'})
@@ -95,7 +95,6 @@ indexing, we will have to create this queue:
 ...     queue(conn).declare()
 'indexer'
 
-
 We can now send a record for bulk indexing:
 
 >>> indexer.bulk_index([str(r.id)])
@@ -109,13 +108,12 @@ which can be started from the command line like e.g.:
    $ <instance cmd> index run
 
 Note, you can achieve much higher indexing speeds, by having multiple processes
-running the ``process_bulk_queue`` concurrently. This can be achieved with
-e.g.:
+running ``process_bulk_queue`` concurrently. This can be achieved with e.g.:
 
 .. code-block:: console
 
+   # Send 8 Celery tasks to bulk index messages from the "indexer" queue
    $ <instance cmd> index run -d -c 8
-
 
 Customizing record indexing
 ---------------------------
@@ -149,11 +147,11 @@ First write a signal receiver. In the example below, we remove the attribute
 ``_internal`` if it exists in the record:
 
 >>> def indexer_receiver(sender, json=None, record=None,
-...                      index=None, doc_type=None):
+...                      index=None, doc_type=None, arguments=None, **kwargs):
 ...     if '_internal' in json:
 ...         del json['_internal']
 
-The receiver takes four parameters besides the sender (which is the Flask
+The receiver takes various parameters besides the sender (which is the Flask
 application)
 
 * ``json``:  JSON is a Python dictionary dump of the record, and the actual
@@ -162,12 +160,22 @@ application)
 * ``record``: The record from which the JSON was dumped.
 * ``index``: The Elasticsearch index in which the record will be indexed.
 * ``doc_type``: The Elasticsearch document type for the record.
+* ``arguments``: The arguments that will be passed to the ``index()`` call.
 
 Connecting the receiver to the signal is as simple as (do this e.g. in your
 extension's ``init_app`` method):
 
 >>> from invenio_indexer.signals import before_record_index
 >>> res = before_record_index.connect(indexer_receiver, sender=app)
+
+Receivers can be useful if you have rules that apply to all of your records.
+If specific types of records have different rules (e.g. in case you had
+"records" and "authors") you can use the
+``before_record_index.dynamic_connect()`` function as so:
+
+>>> # Only be applied to documents sent to the "authors-v1.0.0" index
+>>> res = before_record_index.dynamic_connect(
+...     indexer_receiver, sender=app, index='authors-v1.0.0')
 """
 
 from __future__ import absolute_import, print_function
