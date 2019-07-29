@@ -39,7 +39,7 @@ env:
     - ES_HOST=127.0.0.1
   matrix:
     # ES 7: Redis vs RabbitMQ
-    - REQUIREMENTS=release EXTRAS=all,elasticsearch7 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES7_DOWNLOAD_URL
+    - REQUIREMENTS=release EXTRAS=all,elasticsearch7 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES7_DOWNLOAD_URL DEPLOY=true
     - REQUIREMENTS=devel EXTRAS=all,elasticsearch7 BROKER_URL=amqp://localhost:5672// ES_URL=$ES7_DOWNLOAD_URL
     # ES 6: Redis vs RabbitMQ
     - REQUIREMENTS=lowest EXTRAS=all,elasticsearch6 BROKER_URL=amqp://localhost:5672// ES_URL=$ES6_DOWNLOAD_URL
