@@ -29,7 +29,7 @@ tests_require = [
     'redis>=2.10.0',
 ]
 
-invenio_search_version = '1.0.0'
+invenio_search_version = '1.2.0'
 
 extras_require = {
     'docs:python_version=="2.7"': [
