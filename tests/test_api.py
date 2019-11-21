@@ -117,12 +117,10 @@ def test_index_action(app):
             if lt_es7:
                 assert action['_type'] == \
                     app.config['INDEXER_DEFAULT_DOC_TYPE']
-                assert action['_version'] == record.revision_id
-                assert action['_version_type'] == 'external_gte'
             else:
                 assert action['_type'] == '_doc'
-                assert action['version'] == record.revision_id
-                assert action['version_type'] == 'external_gte'
+            assert action['_version'] == record.revision_id
+            assert action['_version_type'] == 'external_gte'
             assert action['pipeline'] == 'foobar'
             assert 'title' in action['_source']
             assert 'extra' in action['_source']
