@@ -11,6 +11,7 @@
 import os
 from functools import wraps
 
+import six
 from elasticsearch import VERSION as ES_VERSION
 from flask import current_app
 from invenio_search import current_search
@@ -73,38 +74,50 @@ def default_record_to_index(record):
     return index, doc_type
 
 
-def es_bulk_param_compatibility(f):
-    """Decorator to ensure parameter compatibility.
+# NOTE: Remove when https://github.com/elastic/elasticsearch-py/pull/1062 is
+# merged.
+def _es7_expand_action(data):
+    """ES7-compatible bulk action expand."""
+    # when given a string, assume user wants to index raw json
+    if isinstance(data, six.string_types):
+        return '{"index":{}}', data
 
-    ES version 7 removed deprecated params for bulk indexing which are modified
-    by this decorator.
-    """
-    removed_params = (
-        'opType',
-        'versionType',
-        '_versionType',
-        '_parent',
-        '_retry_on_conflict',
-        '_routing',
-        '_version',
-        '_version_type'
-    )
+    # make sure we don't alter the action
+    data = data.copy()
+    op_type = data.pop("_op_type", "index")
+    action = {op_type: {}}
+    for key in (
+        "_id",
+        "_index",
+        "_parent",
+        "_percolate",
+        "_retry_on_conflict",
+        "_routing",
+        "_timestamp",
+        "_type",
+        "_version",
+        "_version_type",
+        "parent",
+        "pipeline",
+        "retry_on_conflict",
+        "routing",
+        "version",
+        "version_type",
+    ):
+        if key in data:
+            if key in (
+                "_parent",
+                "_retry_on_conflict",
+                "_routing",
+                "_version",
+                "_version_type",
+            ):
+                action[op_type][key[1:]] = data.pop(key)
+            else:
+                action[op_type][key] = data.pop(key)
 
-    def update_params(obj, from_key, to_key):
-        if from_key in obj:
-            obj[to_key] = obj[from_key]
-            del obj[from_key]
+    # no data payload for delete
+    if op_type == "delete":
+        return action, None
 
-    @wraps(f)
-    def inner(*args, **kwargs):
-        action = f(*args, **kwargs)
-        if isinstance(action, dict) and ES_VERSION[0] >= 7:
-            for param in removed_params:
-                if param == 'opType':
-                    update_params(action, 'opType', 'op_type')
-                elif param in ('versionType', '_versionType'):
-                    update_params(action, param, 'version_type')
-                else:
-                    update_params(action, param, param[1:])
-        return action
-    return inner
+    return action, data.get("_source", data)

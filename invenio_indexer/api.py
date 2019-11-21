@@ -15,7 +15,9 @@ from contextlib import contextmanager
 
 import pytz
 from celery import current_app as current_celery_app
+from elasticsearch import VERSION as ES_VERSION
 from elasticsearch.helpers import bulk
+from elasticsearch.helpers import expand_action as default_expand_action
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
@@ -26,7 +28,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from .proxies import current_record_to_index
 from .signals import before_record_index
-from .utils import es_bulk_param_compatibility
+from .utils import _es7_expand_action
 
 
 class Producer(KombuProducer):
@@ -201,6 +203,10 @@ class RecordIndexer(object):
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
                 request_timeout=req_timeout,
+                expand_action_callback=(
+                    _es7_expand_action if ES_VERSION[0] >= 7
+                    else default_expand_action
+                ),
                 **es_bulk_kwargs
             )
 
@@ -280,7 +286,6 @@ class RecordIndexer(object):
             '_id': payload['id'],
         }
 
-    @es_bulk_param_compatibility
     def _index_action(self, payload):
         """Bulk index action.
 
