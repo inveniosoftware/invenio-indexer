@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.1.1 (released 2019-11-21)
+
+- Fix bulk action parameters compatibility for Elasticsearch v7.
+
 Version 1.1.0 (released 2019-07-19)
 
 - Add support for Elasticsearch v7.
