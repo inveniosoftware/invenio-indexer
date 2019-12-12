@@ -50,6 +50,8 @@ class RecordIndexer(object):
     these requests in bulk.
     """
 
+    record_cls = Record
+
     def __init__(self, search_client=None, exchange=None, queue=None,
                  routing_key=None, version_type=None, record_to_index=None):
         """Initialize indexer.
@@ -140,7 +142,7 @@ class RecordIndexer(object):
         :param record_uuid: Record identifier.
         :param kwargs: Passed to :meth:`RecordIndexer.index`.
         """
-        return self.index(Record.get_record(record_uuid), **kwargs)
+        return self.index(self.record_cls.get_record(record_uuid), **kwargs)
 
     def delete(self, record, **kwargs):
         """Delete a record.
@@ -165,7 +167,7 @@ class RecordIndexer(object):
         :param record_uuid: Record identifier.
         :param kwargs: Passed to :meth:`RecordIndexer.delete`.
         """
-        self.delete(Record.get_record(record_uuid), **kwargs)
+        self.delete(self.record_cls.get_record(record_uuid), **kwargs)
 
     def bulk_index(self, record_id_iterator):
         """Bulk index records.
@@ -275,7 +277,8 @@ class RecordIndexer(object):
         """
         index, doc_type = payload.get('index'), payload.get('doc_type')
         if not (index and doc_type):
-            record = Record.get_record(payload['id'], with_deleted=True)
+            record = self.record_cls.get_record(
+                payload['id'], with_deleted=True)
             index, doc_type = self.record_to_index(record)
         index, doc_type = self._prepare_index(index, doc_type)
 
@@ -292,7 +295,7 @@ class RecordIndexer(object):
         :param payload: Decoded message body.
         :returns: Dictionary defining an Elasticsearch bulk 'index' action.
         """
-        record = Record.get_record(payload['id'])
+        record = self.record_cls.get_record(payload['id'])
         index, doc_type = self.record_to_index(record)
 
         arguments = {}
