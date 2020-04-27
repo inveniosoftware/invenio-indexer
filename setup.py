@@ -32,9 +32,6 @@ tests_require = [
 invenio_search_version = '1.2.0'
 
 extras_require = {
-    'docs:python_version=="2.7"': [
-        'celery>=3.1.16',
-    ],
     'docs': [
         'Sphinx>=1.5.1,<1.6',
     ],
@@ -116,10 +113,10 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Development Status :: 5 - Production/Stable',
     ],

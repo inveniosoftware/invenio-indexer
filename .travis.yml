@@ -16,7 +16,7 @@ language: python
 matrix:
   fast_finish: true
   allow_failures:
-    - env: REQUIREMENTS=devel EXTRAS=all,elasticsearch7 BROKER_URL=amqp://localhost:5672// ES_URL=$ES7_DOWNLOAD_URL
+    - env: REQUIREMENTS=devel EXTRAS=elasticsearch7 BROKER_URL=amqp://localhost:5672// ES_URL=$ES7_DOWNLOAD_URL
 
 cache:
   - pip
@@ -39,20 +39,21 @@ env:
     - ES_HOST=127.0.0.1
   matrix:
     # ES 7: Redis vs RabbitMQ
-    - REQUIREMENTS=release EXTRAS=all,elasticsearch7 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES7_DOWNLOAD_URL DEPLOY=true
-    - REQUIREMENTS=devel EXTRAS=all,elasticsearch7 BROKER_URL=amqp://localhost:5672// ES_URL=$ES7_DOWNLOAD_URL
+    - REQUIREMENTS=release EXTRAS=elasticsearch7 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES7_DOWNLOAD_URL DEPLOY=true
+    - REQUIREMENTS=devel EXTRAS=elasticsearch7 BROKER_URL=amqp://localhost:5672// ES_URL=$ES7_DOWNLOAD_URL
     # ES 6: Redis vs RabbitMQ
-    - REQUIREMENTS=lowest EXTRAS=all,elasticsearch6 BROKER_URL=amqp://localhost:5672// ES_URL=$ES6_DOWNLOAD_URL
-    - REQUIREMENTS=release EXTRAS=all,elasticsearch6 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES6_DOWNLOAD_URL
+    - REQUIREMENTS=lowest EXTRAS=elasticsearch6 BROKER_URL=amqp://localhost:5672// ES_URL=$ES6_DOWNLOAD_URL
+    - REQUIREMENTS=release EXTRAS=elasticsearch6 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES6_DOWNLOAD_URL
     # ES 5: Redis only
-    - REQUIREMENTS=lowest EXTRAS=all,elasticsearch5 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES5_DOWNLOAD_URL
+    - REQUIREMENTS=lowest EXTRAS=elasticsearch5 BROKER_URL=redis://localhost:6379/0 ES_URL=$ES5_DOWNLOAD_URL
 
 jdk:
   - "oraclejdk8"
 
 python:
-  - "2.7"
-  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8"
 
 before_install:
   - "nvm install 6; nvm use 6"
@@ -68,7 +69,7 @@ before_install:
 
 install:
   - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[$EXTRAS]"
+  - "travis_retry pip install -e .[all]"
 
 before_script:
   # Allow ES to start
@@ -88,6 +89,7 @@ deploy:
     secure: "fa13DKZ+lLH6SMc1y2W+6++OTF0Ee8FLorSySIirrxrSs4tSgAHwCgi0obWtd2d6CQNk4k+IAzrT0inURNPBD8IXLu2rKGsZ/qC4pbq7MxMG3yYnmBNMF2MLbpqQpsIYnfbol5UzLDbsdMyw02Hdbi/WtiR677kB71ynOUzf9768BgiX15BsX8GJ3ULi+p0sbzXW/FYZLQIwneVt1H+NbCAy6pfh9RlW3prHN8c0h/WgU93A+l/sYyrJJVGHa1P/tY/Cbc5Glb6nWNVFsEB6vbG4J1/KIImcEd8eyaINeiNxIb+vn66ekMOaCfKV0YRGq1I0ZdblJ94xF7OcF1mIPnTDVd5lTT7iI5jsu+xOW+dqKqRkfRhaLOd2gxe3STo/cauj4xfQIAXiYc3P56vuo0/yBJjNEoSURmp13m9xr9bBw7STT02DVMYyE3zFzMt5+u7PbjV+c1VwhshzgAefoX2bdREePRD4dpCAf0ODB1rvsiBohQ6HHq1ndE8u28KYARXY28roX0TnHIjejQjX616bCWnVuKqsIk01HG6DI/86+bT2KMMoWjq8NogR/knUMMrFLItkRjOS/jnMeevtx9TNJUEfk/KXeHOrZU9eOVkwdQVi33BeCvx4gdzmoZZPG+E+3ZixpK6M7PVg4Qj48gbnq6AwFrNNAuQMPeuo4Is="
   on:
     tags: true
-    python: "3.5"
+    python: "3.6"
     repo: inveniosoftware/invenio-indexer
     condition: $DEPLOY = true
+  skip_existing: true
