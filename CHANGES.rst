@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.1.2 (released 2020-04-28)
+
+- Introduces ``RecordIndexer.record_cls`` for customizing the record class.
+- Removes Python 2 support.
+
 Version 1.1.1 (released 2019-11-21)
 
 - Fix bulk action parameters compatibility for Elasticsearch v7.
