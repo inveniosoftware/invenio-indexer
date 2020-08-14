@@ -53,7 +53,8 @@ class RecordIndexer(object):
     record_cls = Record
 
     def __init__(self, search_client=None, exchange=None, queue=None,
-                 routing_key=None, version_type=None, record_to_index=None):
+                 routing_key=None, version_type=None, record_to_index=None,
+                 record_cls=None):
         """Initialize indexer.
 
         :param search_client: Elasticsearch client.
@@ -72,6 +73,9 @@ class RecordIndexer(object):
         self._record_to_index = record_to_index or current_record_to_index
         self._routing_key = routing_key
         self._version_type = version_type or 'external_gte'
+
+        if record_cls:
+            self.record_cls = record_cls
 
     def record_to_index(self, record):
         """Get index/doc_type given a record.

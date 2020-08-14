@@ -341,3 +341,16 @@ def test_before_record_index_dynamic_connect(app):
 
         before_record_index.disconnect(_receiver1)
         before_record_index.disconnect(_receiver2)
+
+
+def test_indexer_record_class():
+    """Tests the usage of a custom record class."""
+    class DummyRecord:
+        """Dummy record class."""
+        pass
+
+    indexer = RecordIndexer()
+    assert indexer.record_cls == Record
+
+    indexer = RecordIndexer(record_cls=DummyRecord)
+    assert indexer.record_cls == DummyRecord
