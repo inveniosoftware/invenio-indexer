@@ -33,7 +33,7 @@ invenio_search_version = '1.2.0'
 
 extras_require = {
     'docs': [
-        'Sphinx>=1.5.1,<1.6',
+        'Sphinx>=2.4,<3',
     ],
     'elasticsearch2': [
         'invenio-search[elasticsearch2]>={}'.format(invenio_search_version),
