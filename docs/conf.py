@@ -117,7 +117,7 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-nitpick_ignore = [('py:class', 'Record')]
+nitpick_ignore = [('py:class', 'invenio_records.api.Record')]
 
 # -- Options for HTML output ----------------------------------------------
 html_theme = 'alabaster'
