@@ -105,7 +105,7 @@ def test_index_prefixing(base_app):
     default_doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE']
 
     with app.app_context():
-        with patch('invenio_records.api.Record.validate'):
+        with patch('invenio_records.api._records_state.validate'):
             record = Record.create({'title': 'Test'})
             record2 = Record.create({
                 '$schema': '/records/authorities/authority-v1.0.0.json',

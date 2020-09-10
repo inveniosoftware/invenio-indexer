@@ -34,11 +34,11 @@ def base_app(request):
     instance_path = tempfile.mkdtemp()
     app = Flask('testapp', instance_path=instance_path)
     app.config.update(
-        BROKER_URL=os.environ.get('BROKER_URL',
-                                  'amqp://guest:guest@localhost:5672//'),
-        CELERY_ALWAYS_EAGER=True,
+        CELERY_BROKER_URL=os.environ.get(
+            'BROKER_URL', 'amqp://guest:guest@localhost:5672//'),
+        CELERY_TASK_ALWAYS_EAGER=True,
         CELERY_CACHE_BACKEND='memory',
-        CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+        CELERY_TASK_EAGER_PROPAGATES=True,
         CELERY_RESULT_BACKEND='cache',
         INDEXER_DEFAULT_INDEX='records-default-v1.0.0',
         INDEXER_DEFAULT_DOC_TYPE='default-v1.0.0',

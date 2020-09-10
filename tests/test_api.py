@@ -69,7 +69,7 @@ def test_delete_action(app):
         assert action['_id'] == testid
 
         # Skip JSONSchema validation
-        with patch('invenio_records.api.Record.validate'):
+        with patch('invenio_records.api._records_state.validate'):
             record = Record.create({
                 '$schema': {
                     '$ref': '/records/authorities/authority-v1.0.0.json'},
@@ -236,13 +236,13 @@ def test_replace_refs(app):
 
     with app.app_context():
         record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
-        data = RecordIndexer._prepare_record(record, 'records', 'record')
+        data = RecordIndexer()._prepare_record(record, 'records', 'record')
         assert '$ref' in data
 
     app.config['INDEXER_REPLACE_REFS'] = True
     with app.app_context():
         record = Record({'$ref': 'http://dx.doi.org/10.1234/foo'})
-        data = RecordIndexer._prepare_record(record, 'records', 'record')
+        data = RecordIndexer()._prepare_record(record, 'records', 'record')
         assert '$ref' not in data
         assert json.dumps(data)
 
@@ -306,7 +306,7 @@ def test_bulkrecordindexer_index_delete_by_record(app, queue):
 def test_before_record_index_dynamic_connect(app):
     """Test before_record_index.dynamic_connect."""
     with app.app_context():
-        with patch('invenio_records.api.Record.validate'):
+        with patch('invenio_records.api._records_state.validate'):
             auth_record = Record.create({
                 '$schema': '/records/authorities/authority-v1.0.0.json',
                 'title': 'Test'})
