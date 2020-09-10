@@ -8,6 +8,16 @@
 Changes
 =======
 
+Version 1.2.0 (released TBD)
+
+- Changes delete requests to optimistic concurrency control by providing the
+  the version and version_type in delete requests. The previous behavior can
+  restored by calling
+  ``RecordIndexer().delete(record, version=None, version_type=None)`` instead.
+
+- Adds support for using new-style record dumping controlled via the
+  ``Record.enable_jsonref`` flag.
+
 Version 1.1.2 (released 2020-04-28)
 
 - Introduces ``RecordIndexer.record_cls`` for customizing the record class.

@@ -176,4 +176,6 @@ def test_index_prefixing(base_app):
                 id=str(record3.id),
                 index='test-' + default_index,
                 doc_type=default_doc_type if lt_es7 else '_doc',
+                version=record3.revision_id,
+                version_type='external_gte',
             )

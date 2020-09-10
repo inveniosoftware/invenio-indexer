@@ -174,6 +174,15 @@ class RecordIndexer(object):
         index, doc_type = self.record_to_index(record)
         index, doc_type = self._prepare_index(index, doc_type)
 
+        # Pop version arguments for backward compatibility if they were
+        # explicit set to None in the function call.
+        if 'version' in kwargs and kwargs['version'] is None:
+            kwargs.pop('version', None)
+            kwargs.pop('version_type', None)
+        else:
+            kwargs.setdefault('version', record.revision_id)
+            kwargs.setdefault('version_type', self._version_type)
+
         return self.client.delete(
             id=str(record.id),
             index=index,
@@ -253,7 +262,7 @@ class RecordIndexer(object):
     def _bulk_op(self, record_id_iterator, op_type, index=None, doc_type=None):
         """Index record in Elasticsearch asynchronously.
 
-        :param record_id_iterator: Iterator that yields record UUIDs.
+        :param record_id_iterator: dIterator that yields record UUIDs.
         :param op_type: Indexing operation (one of ``index``, ``create``,
             ``delete`` or ``update``).
         :param index: The Elasticsearch index. (Default: ``None``)
@@ -295,11 +304,20 @@ class RecordIndexer(object):
         :param payload: Decoded message body.
         :returns: Dictionary defining an Elasticsearch bulk 'delete' action.
         """
+        kwargs = {}
         index, doc_type = payload.get('index'), payload.get('doc_type')
         if not (index and doc_type):
             record = self.record_cls.get_record(
                 payload['id'], with_deleted=True)
             index, doc_type = self.record_to_index(record)
+            kwargs['_version'] = record.revision_id
+            kwargs['_version_type'] = self._version_type
+        else:
+            # Allow version to be sent in the payload (but only use if we
+            # haven't loaded the record.
+            if 'version' in payload:
+                kwargs['_version'] = payload['version']
+                kwargs['_version_type'] = self._version_type
         index, doc_type = self._prepare_index(index, doc_type)
 
         return {
@@ -307,6 +325,7 @@ class RecordIndexer(object):
             '_index': index,
             '_type': doc_type,
             '_id': payload['id'],
+            **kwargs,
         }
 
     def _index_action(self, payload):

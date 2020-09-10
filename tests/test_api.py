@@ -221,6 +221,8 @@ def test_delete(app):
             id=str(recid),
             index=app.config['INDEXER_DEFAULT_INDEX'],
             doc_type=doc_type,
+            version=record.revision_id,
+            version_type='external_gte',
         )
 
         with patch('invenio_indexer.api.RecordIndexer.delete') as fun:
