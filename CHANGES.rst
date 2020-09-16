@@ -8,7 +8,7 @@
 Changes
 =======
 
-Version 1.2.0 (released TBD)
+Version 1.2.0 (released 2020-09-16)
 
 - Changes delete requests to optimistic concurrency control by providing the
   the version and version_type in delete requests. The previous behavior can
