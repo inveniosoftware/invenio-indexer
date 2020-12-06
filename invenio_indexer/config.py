@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016-2018 CERN.
+# Copyright (C) 2016-2020 CERN.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Record indexer for Invenio."""
 
-from __future__ import absolute_import, print_function
-
+from invenio_records import Record
 from kombu import Exchange, Queue
 
 INDEXER_DEFAULT_INDEX = "records-record-v1.0.0"
@@ -39,3 +38,8 @@ INDEXER_RECORD_TO_INDEX = 'invenio_indexer.utils.default_record_to_index'
 
 INDEXER_BEFORE_INDEX_HOOKS = []
 """List of automatically connected hooks (function or importable string)."""
+
+INDEXER_RECORD_TYPES = {
+    "recid": dict(record_cls=Record)
+}
+"""Define default params for the RecordIndexer class when instantiating it."""

@@ -51,7 +51,7 @@ class RecordIndexer(object):
     """
 
     record_cls = Record
-    """Record class used for retriving and dumping records.
+    """Record class used for retrieving and dumping records.
 
     You can either subclass and overwrite this attribute, or provide the record
     class to the constructor.
@@ -74,9 +74,9 @@ class RecordIndexer(object):
             (Default: ``external_gte``)
         :param record_to_index: Function to extract the index and doc_type
             from the record.
-        :param record_cls: Record class used for retriving and dumping records.
-            If the ``Record.enable_jsonref`` flag is False, new-style record
-            dumping will be used for creating the Elasticsearch source
+        :param record_cls: Record class used for retrieving and dumping
+            records. If the ``Record.enable_jsonref`` flag is False, new-style
+            record dumping will be used for creating the Elasticsearch source
             document.
         :param record_dumper: Dumper instance to use for dumping the record.
             Only has an effect for new-style record dumping.
@@ -87,11 +87,8 @@ class RecordIndexer(object):
         self._record_to_index = record_to_index or current_record_to_index
         self._routing_key = routing_key
         self._version_type = version_type or 'external_gte'
-
-        if record_cls:
-            self.record_cls = record_cls
-        if record_dumper:
-            self.record_dumper = record_dumper
+        self.record_cls = record_cls or Record
+        self.record_dumper = record_dumper
 
     def record_to_index(self, record):
         """Get index/doc_type given a record.

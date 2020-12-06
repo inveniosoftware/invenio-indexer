@@ -16,32 +16,37 @@ from .api import RecordIndexer
 
 
 @shared_task(ignore_result=True)
-def process_bulk_queue(version_type=None, es_bulk_kwargs=None):
+def process_bulk_queue(version_type=None, es_bulk_kwargs=None,
+                       constructor_params=dict()):
     """Process bulk indexing queue.
 
     :param str version_type: Elasticsearch version type.
     :param dict es_bulk_kwargs: Passed to
         :func:`elasticsearch:elasticsearch.helpers.bulk`.
+    :param dict constructor_params: Passed to RecordIndexer class.
 
     Note: You can start multiple versions of this task.
     """
-    RecordIndexer(version_type=version_type).process_bulk_queue(
+    constructor_params[version_type] = version_type
+    RecordIndexer(**constructor_params).process_bulk_queue(
         es_bulk_kwargs=es_bulk_kwargs)
 
 
 @shared_task(ignore_result=True)
-def index_record(record_uuid):
+def index_record(record_uuid, constructor_params=dict()):
     """Index a single record.
 
     :param record_uuid: The record UUID.
+    :param dict constructor_params: Passed to RecordIndexer class.
     """
-    RecordIndexer().index_by_id(record_uuid)
+    RecordIndexer(**constructor_params).index_by_id(record_uuid)
 
 
 @shared_task(ignore_result=True)
-def delete_record(record_uuid):
+def delete_record(record_uuid, constructor_params=dict()):
     """Delete a single record.
 
     :param record_uuid: The record UUID.
+    :param dict constructor_params: Passed to RecordIndexer class.
     """
-    RecordIndexer().delete_by_id(record_uuid)
+    RecordIndexer(**constructor_params).delete_by_id(record_uuid)

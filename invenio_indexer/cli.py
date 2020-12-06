@@ -59,6 +59,12 @@ def run(delayed, concurrency, version_type=None, queue=None,
             process_bulk_queue.apply_async(**celery_kwargs)
     else:
         click.secho('Indexing records...', fg='green')
+
+        # FIXME TO DECIDE
+        # if we pass multiple -t pidtype, what to do here?
+        #for p in pid_types:
+        #    RecordIndexer(...).process_bulk_queue()
+
         RecordIndexer(version_type=version_type).process_bulk_queue(
             es_bulk_kwargs={'raise_on_error': raise_on_error})
 
@@ -83,7 +89,13 @@ def reindex(pid_type):
     ).values(
         PersistentIdentifier.object_uuid
     ))
-    RecordIndexer().bulk_index(query)
+
+    default_params = current_app.config["INDEXER_RECORD_TYPES"] \
+        .get(pid_type, {})
+    ri = RecordIndexer(**default_params)
+
+    ri.bulk_index(query)
+
     click.secho('Execute "run" command to process the queue!',
                 fg='yellow')
 
