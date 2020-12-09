@@ -21,13 +21,14 @@ tests_require = [
     'mock>=1.3.0',
     'pytest-invenio>=1.3.2',
     'redis>=2.10.0',
+    'pytest-invenio>=1.4.0'
 ]
 
 invenio_search_version = '1.2.0'
 
 extras_require = {
     'docs': [
-        'Sphinx>=2.4,<3',
+        'Sphinx>=3',
     ],
     'elasticsearch2': [
         'invenio-search[elasticsearch2]>={}'.format(invenio_search_version),
