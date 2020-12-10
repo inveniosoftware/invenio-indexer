@@ -14,4 +14,6 @@ from werkzeug.local import LocalProxy
 
 def _get_current_record_to_index():
     return current_app.extensions['invenio-indexer'].record_to_index
+
+
 current_record_to_index = LocalProxy(_get_current_record_to_index)
