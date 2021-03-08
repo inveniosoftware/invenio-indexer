@@ -20,7 +20,7 @@ tests_require = [
     'invenio-db[versioning]>=1.0.0',
     'mock>=1.3.0',
     'pytest-invenio>=1.3.2',
-    'redis>=2.10.0',
+    'redis>=3.2.0',
     'pytest-invenio>=1.4.0'
 ]
 
