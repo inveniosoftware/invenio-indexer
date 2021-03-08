@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.2.1 (released 2021-03-05)
+
+- remove pytest runner from setup dependencies
+
 Version 1.2.0 (released 2020-09-16)
 
 - Changes delete requests to optimistic concurrency control by providing the
