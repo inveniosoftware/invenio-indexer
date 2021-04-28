@@ -93,6 +93,7 @@ setup(
         ],
         'invenio_celery.tasks': [
             'invenio_indexer = invenio_indexer.tasks',
+            'invenio_draft_resources = invenio_draft_resources.services.records.tasks',
         ],
     },
     extras_require=extras_require,
