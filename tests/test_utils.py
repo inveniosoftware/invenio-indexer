@@ -10,9 +10,10 @@
 
 from __future__ import absolute_import, print_function
 
+from unittest.mock import patch
+
 import pytest
 from elasticsearch import VERSION as ES_VERSION
-from mock import patch
 
 from invenio_indexer.utils import schema_to_index
 

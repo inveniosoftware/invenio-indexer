@@ -12,6 +12,7 @@ from __future__ import absolute_import, print_function
 
 import json
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytz
 from celery.messaging import establish_connection
@@ -21,7 +22,6 @@ from invenio_records.api import Record
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
 from kombu.compat import Consumer
-from mock import MagicMock, patch
 
 from invenio_indexer.api import BulkRecordIndexer, RecordIndexer
 from invenio_indexer.signals import before_record_index

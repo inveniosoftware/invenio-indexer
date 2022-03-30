@@ -17,24 +17,15 @@ history = open('CHANGES.rst').read()
 
 tests_require = [
     'attrs>=17.4.0',
-    'invenio-db[versioning]>=1.0.0',
-    'mock>=1.3.0',
-    'pytest-invenio>=1.3.2',
+    'pytest-invenio>=1.4.6',
     'redis>=3.2.0',
-    'pytest-invenio>=1.4.0'
 ]
 
-invenio_search_version = '1.2.0'
+invenio_search_version = '1.4.0'
 
 extras_require = {
     'docs': [
-        'Sphinx>=3',
-    ],
-    'elasticsearch2': [
-        'invenio-search[elasticsearch2]>={}'.format(invenio_search_version),
-    ],
-    'elasticsearch5': [
-        'invenio-search[elasticsearch5]>={}'.format(invenio_search_version),
+        'Sphinx>=4.2.0,<5',
     ],
     'elasticsearch6': [
         'invenio-search[elasticsearch6]>={}'.format(invenio_search_version),
@@ -47,7 +38,7 @@ extras_require = {
 
 extras_require['all'] = []
 for name, reqs in extras_require.items():
-    if name[0] == ':' or name in ('elasticsearch2', 'elasticsearch5', 'elasticsearch6', 'elasticsearch7'):
+    if name[0] == ':' or name in ('elasticsearch6', 'elasticsearch7'):
         continue
     extras_require['all'].extend(reqs)
 
@@ -55,10 +46,9 @@ setup_requires = [
 ]
 
 install_requires = [
-    'Flask>=0.11.1',
-    'Flask-CeleryExt>=0.3.0',
-    'invenio-pidstore>=1.0.0',
-    'invenio-records>=1.0.0',
+    'invenio-db>=1.0.14',
+    'invenio-pidstore>=1.2.0',
+    'invenio-records>=1.4.0',
     'pytz>=2016.4',
 ]
 

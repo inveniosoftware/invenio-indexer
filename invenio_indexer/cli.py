@@ -27,6 +27,16 @@ def abort_if_false(ctx, param, value):
         ctx.abort()
 
 
+def resultcallback(group):
+    """Compatibility layer for Click 7 and 8."""
+    if hasattr(group, 'result_callback') and group.result_callback is not None:
+        decorator = group.result_callback()
+    else:
+        # Click < 8.0
+        decorator = group.resultcallback()
+    return decorator
+
+
 @index.command()
 @click.option(
     '--delayed', '-d', is_flag=True, help='Run indexing in background.')
@@ -93,7 +103,7 @@ def queue():
     """Manage indexing queue."""
 
 
-@queue.resultcallback()
+@resultcallback(queue)
 @with_appcontext
 def process_actions(actions):
     """Process queue actions."""
