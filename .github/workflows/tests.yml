@@ -34,17 +34,31 @@ jobs:
           mq-service: [rabbitmq, redis]
           search-service: [elasticsearch6, elasticsearch7]
           exclude:
+          - python-version: 3.6
+            requirements-level: pypi
+
+          - python-version: 3.7
+            requirements-level: min
+
           - python-version: 3.8
             requirements-level: min
 
           - python-version: 3.9
             requirements-level: min
 
-          - search-service: elasticsearch7
-            python-version: 3.6
+          - python-version: 3.6
+            search-service: elasticsearch7
+
+          - python-version: 3.7
+            search-service: elasticsearch6
+
+          - python-version: 3.8
+            search-service: elasticsearch6
+
+          - python-version: 3.9
+            search-service: elasticsearch6
 
           include:
-
           - search-service: elasticsearch6
             SEARCH_EXTRAS: "elasticsearch6"
 

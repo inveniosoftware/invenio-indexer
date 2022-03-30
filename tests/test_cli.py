@@ -22,23 +22,23 @@ from invenio_indexer import cli
 from invenio_indexer.api import RecordIndexer
 
 
-def test_run(script_info):
+def test_run(app):
     """Test run."""
-    runner = CliRunner()
-    res = runner.invoke(cli.run, [], obj=script_info)
+    runner = app.test_cli_runner()
+    res = runner.invoke(cli.run, [])
     assert 0 == res.exit_code
 
-    runner = CliRunner()
-    res = runner.invoke(cli.run, ['-d', '-c', '2'], obj=script_info)
+    runner = app.test_cli_runner()
+    res = runner.invoke(cli.run, ['-d', '-c', '2'])
     assert 0 == res.exit_code
     assert 'Starting 2 tasks' in res.output
 
 
-def test_reindex(app, script_info):
+def test_reindex(app):
     """Test reindex."""
     # load records
     with app.test_request_context():
-        runner = CliRunner()
+        runner = app.test_cli_runner()
 
         id1 = uuid.uuid4()
         id2 = uuid.uuid4()
@@ -67,15 +67,13 @@ def test_reindex(app, script_info):
         assert current_search_client.indices.exists(index) is False
 
         # Initialize queue
-        res = runner.invoke(cli.queue, ['init', 'purge'],
-                            obj=script_info)
+        res = runner.invoke(cli.queue, ['init', 'purge'])
         assert 0 == res.exit_code
 
         res = runner.invoke(cli.reindex,
-                            ['--yes-i-know', '-t', 'recid'],
-                            obj=script_info)
+                            ['--yes-i-know', '-t', 'recid'])
         assert 0 == res.exit_code
-        res = runner.invoke(cli.run, [], obj=script_info)
+        res = runner.invoke(cli.run, [])
         assert 0 == res.exit_code
         current_search.flush_and_refresh(index)
 
@@ -90,10 +88,9 @@ def test_reindex(app, script_info):
         # Destroy the index and reindex
         list(current_search.delete(ignore=[404]))
         res = runner.invoke(cli.reindex,
-                            ['--yes-i-know', '-t', 'recid'],
-                            obj=script_info)
+                            ['--yes-i-know', '-t', 'recid'])
         assert 0 == res.exit_code
-        res = runner.invoke(cli.run, [], obj=script_info)
+        res = runner.invoke(cli.run, [])
         assert 0 == res.exit_code
         current_search.flush_and_refresh(index)
 
@@ -103,7 +100,6 @@ def test_reindex(app, script_info):
         assert res['hits']['hits'][0]['_source']['title'] == 'Test 1'
 
         # Destroy queue and the index
-        res = runner.invoke(cli.queue, ['delete'],
-                            obj=script_info)
+        res = runner.invoke(cli.queue, ['delete'])
         assert 0 == res.exit_code
         list(current_search.delete(ignore=[404]))

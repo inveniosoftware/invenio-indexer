@@ -75,12 +75,6 @@ def app(base_app):
 
 
 @pytest.fixture()
-def script_info(app):
-    """Get ScriptInfo object for testing CLI."""
-    return ScriptInfo(create_app=lambda info: app)
-
-
-@pytest.fixture()
 def queue(app):
     """Get queue object for testing bulk operations."""
     queue = app.config['INDEXER_MQ_QUEUE']

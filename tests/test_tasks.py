@@ -11,8 +11,7 @@
 from __future__ import absolute_import, print_function
 
 import uuid
-
-from mock import patch
+from unittest.mock import patch
 
 from invenio_indexer.tasks import delete_record, index_record, \
     process_bulk_queue

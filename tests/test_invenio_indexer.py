@@ -11,13 +11,13 @@
 from __future__ import absolute_import, print_function
 
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytz
 from elasticsearch import VERSION as ES_VERSION
 from flask import Flask
 from invenio_db import db
 from invenio_records import Record
-from mock import MagicMock, patch
 
 from invenio_indexer import InvenioIndexer
 from invenio_indexer.api import RecordIndexer
