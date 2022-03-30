@@ -8,9 +8,13 @@
 Changes
 =======
 
+Version 1.2.2 (released 2022-03-30)
+
+- Add support for Click v8.1+ and Flask v2.1+.
+
 Version 1.2.1 (released 2021-03-05)
 
-- remove pytest runner from setup dependencies
+- Remove pytest runner from setup dependencies
 
 Version 1.2.0 (released 2020-09-16)
 
