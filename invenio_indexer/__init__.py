@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016-2018 CERN.
+# Copyright (C) 2016-2022 CERN.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -177,8 +177,6 @@ If specific types of records have different rules (e.g. in case you had
 >>> res = before_record_index.dynamic_connect(
 ...     indexer_receiver, sender=app, index='authors-v1.0.0')
 """
-
-from __future__ import absolute_import, print_function
 
 from .ext import InvenioIndexer
 from .proxies import current_record_to_index

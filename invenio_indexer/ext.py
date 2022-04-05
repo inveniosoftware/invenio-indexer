@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016-2018 CERN.
+# Copyright (C) 2016-2022 CERN.
 # Copyright (C) 2016 TIND.
 #
 # Invenio is free software; you can redistribute it and/or modify it
@@ -9,9 +9,6 @@
 
 """Flask exension for Invenio-Indexer."""
 
-from __future__ import absolute_import, print_function
-
-import six
 from flask import current_app
 from werkzeug.utils import cached_property, import_string
 
@@ -41,7 +38,7 @@ class InvenioIndexer(object):
 
         hooks = app.config.get('INDEXER_BEFORE_INDEX_HOOKS', [])
         for hook in hooks:
-            if isinstance(hook, six.string_types):
+            if isinstance(hook, str):
                 hook = import_string(hook)
             before_record_index.connect_via(app)(hook)
 

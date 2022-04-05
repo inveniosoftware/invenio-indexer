@@ -11,7 +11,6 @@
 import os
 from functools import wraps
 
-import six
 from elasticsearch import VERSION as ES_VERSION
 from flask import current_app
 from invenio_search import current_search
@@ -79,7 +78,7 @@ def default_record_to_index(record):
 def _es7_expand_action(data):
     """ES7-compatible bulk action expand."""
     # when given a string, assume user wants to index raw json
-    if isinstance(data, six.string_types):
+    if isinstance(data, str):
         return '{"index":{}}', data
 
     # make sure we don't alter the action
