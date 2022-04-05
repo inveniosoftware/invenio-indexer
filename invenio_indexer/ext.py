@@ -14,6 +14,7 @@ from werkzeug.utils import cached_property, import_string
 
 from . import config
 from .cli import run  # noqa
+from .registry import IndexerRegistry
 from .signals import before_record_index
 
 
@@ -34,6 +35,7 @@ class InvenioIndexer(object):
         :param app: The Flask application.
         """
         self.init_config(app)
+        self.registry = IndexerRegistry()
         app.extensions['invenio-indexer'] = self
 
         hooks = app.config.get('INDEXER_BEFORE_INDEX_HOOKS', [])
