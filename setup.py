@@ -18,7 +18,7 @@ history = open('CHANGES.rst').read()
 tests_require = [
     'attrs>=17.4.0',
     'pytest-invenio>=1.4.6',
-    'redis>=3.2.0',
+    'redis>=3.4.0',
 ]
 
 invenio_search_version = '1.4.0'
@@ -98,9 +98,9 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
         'Development Status :: 5 - Production/Stable',
     ],
