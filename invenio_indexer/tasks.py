@@ -11,35 +11,56 @@
 from celery import shared_task
 
 from .api import RecordIndexer
+from .proxies import current_indexer_registry
 
 
 @shared_task(ignore_result=True)
-def process_bulk_queue(version_type=None, es_bulk_kwargs=None):
+def process_bulk_queue(
+    version_type=None, es_bulk_kwargs=None, indexer_name=None
+):
     """Process bulk indexing queue.
 
     :param str version_type: Elasticsearch version type.
     :param dict es_bulk_kwargs: Passed to
         :func:`elasticsearch:elasticsearch.helpers.bulk`.
+    :param indexer_name: Name of the indexer to get from the registry.
+        Incompatible with version_type.
 
     Note: You can start multiple versions of this task.
     """
-    RecordIndexer(version_type=version_type).process_bulk_queue(
-        es_bulk_kwargs=es_bulk_kwargs)
+    if indexer_name:
+        indexer = current_indexer_registry.get(indexer_name)
+    else:
+        indexer = RecordIndexer(version_type=version_type)
+
+    indexer.process_bulk_queue(es_bulk_kwargs=es_bulk_kwargs)
 
 
 @shared_task(ignore_result=True)
-def index_record(record_uuid):
+def index_record(record_uuid, indexer_name=None):
     """Index a single record.
 
     :param record_uuid: The record UUID.
+    :param indexer_name: Name of the indexer to get from the registry.
     """
-    RecordIndexer().index_by_id(record_uuid)
+    if indexer_name:
+        indexer = current_indexer_registry.get(indexer_name)
+    else:
+        indexer = RecordIndexer()
+
+    indexer.index_by_id(record_uuid)
 
 
 @shared_task(ignore_result=True)
-def delete_record(record_uuid):
+def delete_record(record_uuid, indexer_name=None):
     """Delete a single record.
 
     :param record_uuid: The record UUID.
+    :param indexer_name: Name of the indexer to get from the registry.
     """
-    RecordIndexer().delete_by_id(record_uuid)
+    if indexer_name:
+        indexer = current_indexer_registry.get(indexer_name)
+    else:
+        indexer = RecordIndexer()
+
+    indexer.delete_by_id(record_uuid)
