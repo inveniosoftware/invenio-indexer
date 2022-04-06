@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.2.3 (released 2022-04-06)
+
+- Add indexer registry and use it in celery tasks.
+
 Version 1.2.2 (released 2022-03-30)
 
 - Add support for Click v8.1+ and Flask v2.1+.
