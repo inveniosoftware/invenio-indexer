@@ -268,12 +268,13 @@ class RecordIndexer(object):
         """
         with self.create_producer() as producer:
             for rec in record_id_iterator:
-                producer.publish(dict(
+                data = dict(
                     id=str(rec),
                     op=op_type,
                     index=index,
-                    doc_type=doc_type
-                ))
+                    doc_type=doc_type,
+                )
+                producer.publish(data, declare=[self.mq_queue])
 
     def _actionsiter(self, message_iterator):
         """Iterate bulk actions.
