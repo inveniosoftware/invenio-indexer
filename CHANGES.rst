@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.2.4 (released 2022-04-26)
+
+- Aligns with best practice from Kombu that producers should also declare
+  queues.
+
 Version 1.2.3 (released 2022-04-06)
 
 - Add indexer registry and use it in celery tasks.
