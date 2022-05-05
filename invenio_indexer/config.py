@@ -32,6 +32,13 @@ INDEXER_REPLACE_REFS = True
 INDEXER_BULK_REQUEST_TIMEOUT = 10
 """Request timeout to use in Bulk indexing."""
 
+INDEXER_MAX_BULK_CONSUMERS = 5
+"""Maximum number of concurrent consumers for bulk indexing.
+
+This threshold is applied per queue, so each indexing queue would
+have a maximum of 5 consumers at the same time.
+"""
+
 INDEXER_RECORD_TO_INDEX = 'invenio_indexer.utils.default_record_to_index'
 """Provide an implemetation of record_to_index function"""
 
