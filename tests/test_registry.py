@@ -33,3 +33,7 @@ def test_indexer_registry(app):
     pytest.raises(
         KeyError, current_indexer_registry.get_indexer_id, RecordIndexer()
     )
+    # add a second one and get the list
+    current_indexer_registry.register(indexer_instance, "test_too")
+    indexers = current_indexer_registry.all().keys()
+    assert not set(indexers).difference({"test", "test_too"})
