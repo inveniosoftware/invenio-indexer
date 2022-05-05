@@ -35,3 +35,7 @@ class IndexerRegistry:
             if instance == indexer_instance:
                 return indexer_id
         raise KeyError("Indexer not found in registry.")
+
+    def all(self):
+        """Get all the registered indexers."""
+        return self._indexers
