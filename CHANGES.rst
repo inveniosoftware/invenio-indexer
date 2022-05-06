@@ -1,12 +1,18 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2016-2019 CERN.
+    Copyright (C) 2016-2022 CERN.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version 1.2.5 (released 2022-05-05)
+
+- Add a config to defined the max number of concurrent consumers
+  when bulk indexing.
+- Allows to retrieve all registered indexers.
 
 Version 1.2.4 (released 2022-04-26)
 
