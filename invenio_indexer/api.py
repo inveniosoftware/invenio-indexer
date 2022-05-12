@@ -16,6 +16,7 @@ from celery import current_app as current_celery_app
 from elasticsearch import VERSION as ES_VERSION
 from elasticsearch.helpers import bulk
 from elasticsearch.helpers import expand_action as default_expand_action
+from elasticsearch_dsl import Index
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
@@ -161,6 +162,23 @@ class RecordIndexer(object):
         :param kwargs: Passed to :meth:`RecordIndexer.index`.
         """
         return self.index(self.record_cls.get_record(record_uuid), **kwargs)
+
+    def refresh(self, index=None, **kwargs):
+        """Refresh an index.
+
+        :param index: the index or index name to refresh. if not given the
+                      indexer record class index will be used.
+        """
+        if not index:
+            index_name = self.record_cls.index._name
+        elif isinstance(index, Index):
+            index_name = index._name
+        else:
+            index_name = index
+
+        index_name = build_alias_name(index_name)
+
+        return self.client.indices.refresh(index=index_name, **kwargs)
 
     def delete(self, record, **kwargs):
         """Delete a record.

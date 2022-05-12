@@ -14,8 +14,8 @@ import tempfile
 
 import pytest
 from celery.messaging import establish_connection
+from elasticsearch_dsl import Index
 from flask import Flask
-from flask.cli import ScriptInfo
 from flask_celeryext import FlaskCeleryExt
 from invenio_db import InvenioDB, db
 from invenio_records import InvenioRecords
@@ -84,3 +84,29 @@ def queue(app):
             q.purge()
 
     return queue
+
+
+@pytest.fixture(scope="function")
+def search_prefix(app):
+    """Sets the search prefix."""
+    tmp = app.config["SEARCH_INDEX_PREFIX"]
+    app.config["SEARCH_INDEX_PREFIX"] = "test-"
+    yield
+    app.config["SEARCH_INDEX_PREFIX"] = tmp
+
+
+@pytest.fixture(scope="function")
+def record_cls_with_index(app):
+    """Record class with index field."""
+
+    class Record:
+        """Simulates a record class with an IndexField.
+
+        Since the IndexField has the __get__ method overwritten
+        to return the actual index object this class behaves in
+        the same way.
+        """
+
+        index = Index(app.config["INDEXER_DEFAULT_INDEX"])
+
+    return Record

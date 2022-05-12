@@ -15,6 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytz
 from celery.messaging import establish_connection
 from elasticsearch import VERSION as ES_VERSION
+from elasticsearch_dsl import Index
 from invenio_db import db
 from invenio_records.api import Record
 from jsonresolver import JSONResolver
@@ -202,6 +203,72 @@ def test_index(app):
         with patch('invenio_indexer.api.RecordIndexer.index') as fun:
             RecordIndexer(search_client=client_mock).index_by_id(recid)
             assert fun.called
+
+
+def test_refresh_with_indexer(app, record_cls_with_index):
+    """Test index refresh."""
+    with app.app_context():
+        client_mock = MagicMock()
+        ri = RecordIndexer(
+            search_client=client_mock,
+            record_cls=record_cls_with_index,
+            version_type='force'
+        )
+        ri.refresh()
+
+        client_mock.indices.refresh.assert_called_with(
+            index=app.config['INDEXER_DEFAULT_INDEX']
+        )
+
+
+def test_refresh_with_indexer_and_prefix(
+    search_prefix, app, record_cls_with_index
+):
+    """Test index refresh."""
+    with app.app_context():
+        client_mock = MagicMock()
+        ri = RecordIndexer(
+            search_client=client_mock,
+            record_cls=record_cls_with_index,
+            version_type='force'
+        )
+        ri.refresh()
+
+        prefix = app.config['SEARCH_INDEX_PREFIX']
+        index_name = app.config['INDEXER_DEFAULT_INDEX']
+        prefixed_index = f"{prefix}{index_name}"
+
+        client_mock.indices.refresh.assert_called_with(
+            index=prefixed_index
+        )
+
+
+def test_refresh_with_index_name(app):
+    """Test index refresh."""
+    with app.app_context():
+        client_mock = MagicMock()
+        index_name = app.config['INDEXER_DEFAULT_INDEX']
+
+        ri = RecordIndexer(search_client=client_mock, version_type='force')
+        ri.refresh(index=index_name)
+
+        client_mock.indices.refresh.assert_called_with(
+            index=index_name
+        )
+
+
+def test_refresh_with_index_obj(app):
+    """Test index refresh."""
+    with app.app_context():
+        client_mock = MagicMock()
+        index_name = app.config['INDEXER_DEFAULT_INDEX']
+
+        ri = RecordIndexer(search_client=client_mock, version_type='force')
+        ri.refresh(index=Index(index_name))
+
+        client_mock.indices.refresh.assert_called_with(
+            index=index_name
+        )
 
 
 def test_delete(app):
