@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.2.6 (released 2022-05-13)
+
+- Add refresh method to RecordIndexer API class.
+
 Version 1.2.5 (released 2022-05-05)
 
 - Add a config to defined the max number of concurrent consumers
