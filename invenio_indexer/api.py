@@ -13,9 +13,7 @@ from contextlib import contextmanager
 
 import pytz
 from celery import current_app as current_celery_app
-from elasticsearch import VERSION as ES_VERSION
 from elasticsearch.helpers import bulk
-from elasticsearch.helpers import expand_action as default_expand_action
 from elasticsearch_dsl import Index
 from flask import current_app
 from invenio_records.api import Record
@@ -250,10 +248,7 @@ class RecordIndexer(object):
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
                 request_timeout=req_timeout,
-                expand_action_callback=(
-                    _es7_expand_action if ES_VERSION[0] >= 7
-                    else default_expand_action
-                ),
+                expand_action_callback=_es7_expand_action,
                 **es_bulk_kwargs
             )
 
