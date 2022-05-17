@@ -180,6 +180,23 @@ class RecordIndexer(object):
 
         return self.client.indices.refresh(index=index_name, **kwargs)
 
+    def exists(self, index=None, **kwargs):
+        """Check if an index exists.
+
+        :param index: the index or index name to refresh. if not given the
+                      indexer record class index will be used.
+        """
+        if not index:
+            index_name = self.record_cls.index._name
+        elif isinstance(index, Index):
+            index_name = index._name
+        else:
+            index_name = index
+
+        index_name = build_alias_name(index_name)
+
+        return self.client.indices.exists(index=index_name, **kwargs)
+
     def delete(self, record, **kwargs):
         """Delete a record.
 
