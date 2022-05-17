@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.2.7 (released 2022-05-17)
+
+- Add exists method to RecordIndexer API class.
+
 Version 1.2.6 (released 2022-05-13)
 
 - Add refresh method to RecordIndexer API class.
