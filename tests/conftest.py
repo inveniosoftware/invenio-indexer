@@ -20,8 +20,7 @@ from flask_celeryext import FlaskCeleryExt
 from invenio_db import InvenioDB, db
 from invenio_records import InvenioRecords
 from invenio_search import InvenioSearch
-from sqlalchemy_utils.functions import create_database, database_exists, \
-    drop_database
+from sqlalchemy_utils.functions import create_database, database_exists, drop_database
 
 from invenio_indexer import InvenioIndexer
 
@@ -30,18 +29,20 @@ from invenio_indexer import InvenioIndexer
 def base_app(request):
     """Base application fixture."""
     instance_path = tempfile.mkdtemp()
-    app = Flask('testapp', instance_path=instance_path)
+    app = Flask("testapp", instance_path=instance_path)
     app.config.update(
         CELERY_BROKER_URL=os.environ.get(
-            'BROKER_URL', 'amqp://guest:guest@localhost:5672//'),
+            "BROKER_URL", "amqp://guest:guest@localhost:5672//"
+        ),
         CELERY_TASK_ALWAYS_EAGER=True,
-        CELERY_CACHE_BACKEND='memory',
+        CELERY_CACHE_BACKEND="memory",
         CELERY_TASK_EAGER_PROPAGATES=True,
-        CELERY_RESULT_BACKEND='cache',
-        INDEXER_DEFAULT_INDEX='records-default-v1.0.0',
-        INDEXER_DEFAULT_DOC_TYPE='default-v1.0.0',
+        CELERY_RESULT_BACKEND="cache",
+        INDEXER_DEFAULT_INDEX="records-default-v1.0.0",
+        INDEXER_DEFAULT_DOC_TYPE="default-v1.0.0",
         SQLALCHEMY_DATABASE_URI=os.environ.get(
-            'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
+            "SQLALCHEMY_DATABASE_URI", "sqlite:///test.db"
+        ),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         TESTING=True,
     )
@@ -49,7 +50,7 @@ def base_app(request):
     InvenioDB(app)
     InvenioRecords(app)
     search = InvenioSearch(app, entry_point_group=None)
-    search.register_mappings('records', 'data')
+    search.register_mappings("records", "data")
 
     with app.app_context():
         if not database_exists(str(db.engine.url)):
@@ -75,7 +76,7 @@ def app(base_app):
 @pytest.fixture()
 def queue(app):
     """Get queue object for testing bulk operations."""
-    queue = app.config['INDEXER_MQ_QUEUE']
+    queue = app.config["INDEXER_MQ_QUEUE"]
 
     with app.app_context():
         with establish_connection() as c:

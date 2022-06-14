@@ -27,9 +27,9 @@ def test_run(app):
     assert 0 == res.exit_code
 
     runner = app.test_cli_runner()
-    res = runner.invoke(cli.run, ['-d', '-c', '2'])
+    res = runner.invoke(cli.run, ["-d", "-c", "2"])
     assert 0 == res.exit_code
-    assert 'Starting 2 tasks' in res.output
+    assert "Starting 2 tasks" in res.output
 
 
 def test_reindex(app):
@@ -40,19 +40,19 @@ def test_reindex(app):
 
         id1 = uuid.uuid4()
         id2 = uuid.uuid4()
-        record1 = Record.create(dict(title='Test 1', recid=1), id_=id1)
-        record2 = Record.create(dict(title='Test 2', recid=2), id_=id2)
+        record1 = Record.create(dict(title="Test 1", recid=1), id_=id1)
+        record2 = Record.create(dict(title="Test 2", recid=2), id_=id2)
         PersistentIdentifier.create(
-            pid_type='recid',
+            pid_type="recid",
             pid_value=1,
-            object_type='rec',
+            object_type="rec",
             object_uuid=id1,
             status=PIDStatus.REGISTERED,
         )
         PersistentIdentifier.create(
-            pid_type='recid',
+            pid_type="recid",
             pid_value=2,
-            object_type='rec',
+            object_type="rec",
             object_uuid=id2,
             status=PIDStatus.REGISTERED,
         )
@@ -65,11 +65,10 @@ def test_reindex(app):
         assert current_search_client.indices.exists(index) is False
 
         # Initialize queue
-        res = runner.invoke(cli.queue, ['init', 'purge'])
+        res = runner.invoke(cli.queue, ["init", "purge"])
         assert 0 == res.exit_code
 
-        res = runner.invoke(cli.reindex,
-                            ['--yes-i-know', '-t', 'recid'])
+        res = runner.invoke(cli.reindex, ["--yes-i-know", "-t", "recid"])
         assert 0 == res.exit_code
         res = runner.invoke(cli.run, [])
         assert 0 == res.exit_code
@@ -77,7 +76,7 @@ def test_reindex(app):
 
         # Both records should be indexed
         res = current_search_client.search(index=index)
-        assert len(res['hits']['hits']) == 2
+        assert len(res["hits"]["hits"]) == 2
 
         # Delete one of the records
         record2 = Record.get_record(id2)
@@ -85,8 +84,7 @@ def test_reindex(app):
         db.session.commit()
         # Destroy the index and reindex
         list(current_search.delete(ignore=[404]))
-        res = runner.invoke(cli.reindex,
-                            ['--yes-i-know', '-t', 'recid'])
+        res = runner.invoke(cli.reindex, ["--yes-i-know", "-t", "recid"])
         assert 0 == res.exit_code
         res = runner.invoke(cli.run, [])
         assert 0 == res.exit_code
@@ -94,10 +92,10 @@ def test_reindex(app):
 
         # Check that the deleted record is not indexed
         res = current_search_client.search(index=index)
-        assert len(res['hits']['hits']) == 1
-        assert res['hits']['hits'][0]['_source']['title'] == 'Test 1'
+        assert len(res["hits"]["hits"]) == 1
+        assert res["hits"]["hits"][0]["_source"]["title"] == "Test 1"
 
         # Destroy queue and the index
-        res = runner.invoke(cli.queue, ['delete'])
+        res = runner.invoke(cli.queue, ["delete"])
         assert 0 == res.exit_code
         list(current_search.delete(ignore=[404]))

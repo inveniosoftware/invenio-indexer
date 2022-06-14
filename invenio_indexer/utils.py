@@ -24,13 +24,15 @@ def schema_to_index(schema, index_names=None):
     :param index_names: A list of index name.
     :returns: A tuple containing (index, doc_type).
     """
-    parts = schema.split('/')
+    parts = schema.split("/")
     doc_type, ext = os.path.splitext(parts[-1])
     parts[-1] = doc_type
     if ES_VERSION[0] >= 7:
-        doc_type = '_doc'
+        doc_type = "_doc"
 
-    if ext not in {'.json', }:
+    if ext not in {
+        ".json",
+    }:
         return (None, None)
 
     if index_names is None:
@@ -55,20 +57,20 @@ def default_record_to_index(record):
     :returns: Tuple (index, doc_type).
     """
     index_names = current_search.mappings.keys()
-    schema = record.get('$schema', '')
+    schema = record.get("$schema", "")
     if isinstance(schema, dict):
-        schema = schema.get('$ref', '')
+        schema = schema.get("$ref", "")
 
     index, doc_type = schema_to_index(schema, index_names=index_names)
 
     if not (index and doc_type):
         index, doc_type = (
-            current_app.config['INDEXER_DEFAULT_INDEX'],
-            current_app.config['INDEXER_DEFAULT_DOC_TYPE'],
+            current_app.config["INDEXER_DEFAULT_INDEX"],
+            current_app.config["INDEXER_DEFAULT_DOC_TYPE"],
         )
 
     if ES_VERSION[0] >= 7:
-        doc_type = '_doc'
+        doc_type = "_doc"
 
     return index, doc_type
 

@@ -38,7 +38,7 @@ class Producer(KombuProducer):
 
     def publish(self, data, **kwargs):
         """Validate operation type."""
-        assert data.get('op') in {'index', 'create', 'delete', 'update'}
+        assert data.get("op") in {"index", "create", "delete", "update"}
         return super(Producer, self).publish(data, **kwargs)
 
 
@@ -59,9 +59,17 @@ class RecordIndexer(object):
     record_dumper = None
     """Dumper instance to use with this record indexer."""
 
-    def __init__(self, search_client=None, exchange=None, queue=None,
-                 routing_key=None, version_type=None, record_to_index=None,
-                 record_cls=None, record_dumper=None):
+    def __init__(
+        self,
+        search_client=None,
+        exchange=None,
+        queue=None,
+        routing_key=None,
+        version_type=None,
+        record_to_index=None,
+        record_cls=None,
+        record_dumper=None,
+    ):
         """Initialize indexer.
 
         :param search_client: Elasticsearch client.
@@ -85,7 +93,7 @@ class RecordIndexer(object):
         self._queue = queue
         self._record_to_index = record_to_index or current_record_to_index
         self._routing_key = routing_key
-        self._version_type = version_type or 'external_gte'
+        self._version_type = version_type or "external_gte"
 
         if record_cls:
             self.record_cls = record_cls
@@ -106,7 +114,7 @@ class RecordIndexer(object):
 
         :returns: The Message Queue queue.
         """
-        return self._queue or current_app.config['INDEXER_MQ_QUEUE']
+        return self._queue or current_app.config["INDEXER_MQ_QUEUE"]
 
     @property
     def mq_exchange(self):
@@ -114,7 +122,7 @@ class RecordIndexer(object):
 
         :returns: The Message Queue exchange.
         """
-        return self._exchange or current_app.config['INDEXER_MQ_EXCHANGE']
+        return self._exchange or current_app.config["INDEXER_MQ_EXCHANGE"]
 
     @property
     def mq_routing_key(self):
@@ -122,8 +130,7 @@ class RecordIndexer(object):
 
         :returns: The Message Queue routing key.
         """
-        return (self._routing_key or
-                current_app.config['INDEXER_MQ_ROUTING_KEY'])
+        return self._routing_key or current_app.config["INDEXER_MQ_ROUTING_KEY"]
 
     #
     # High-level API
@@ -141,8 +148,7 @@ class RecordIndexer(object):
         """
         index, doc_type = self.record_to_index(record)
         arguments = arguments or {}
-        body = self._prepare_record(
-            record, index, doc_type, arguments, **kwargs)
+        body = self._prepare_record(record, index, doc_type, arguments, **kwargs)
         index, doc_type = self._prepare_index(index, doc_type)
 
         return self.client.index(
@@ -209,18 +215,15 @@ class RecordIndexer(object):
 
         # Pop version arguments for backward compatibility if they were
         # explicit set to None in the function call.
-        if 'version' in kwargs and kwargs['version'] is None:
-            kwargs.pop('version', None)
-            kwargs.pop('version_type', None)
+        if "version" in kwargs and kwargs["version"] is None:
+            kwargs.pop("version", None)
+            kwargs.pop("version_type", None)
         else:
-            kwargs.setdefault('version', record.revision_id)
-            kwargs.setdefault('version_type', self._version_type)
+            kwargs.setdefault("version", record.revision_id)
+            kwargs.setdefault("version_type", self._version_type)
 
         return self.client.delete(
-            id=str(record.id),
-            index=index,
-            doc_type=doc_type,
-            **kwargs
+            id=str(record.id), index=index, doc_type=doc_type, **kwargs
         )
 
     def delete_by_id(self, record_uuid, **kwargs):
@@ -236,14 +239,14 @@ class RecordIndexer(object):
 
         :param record_id_iterator: Iterator yielding record UUIDs.
         """
-        self._bulk_op(record_id_iterator, 'index')
+        self._bulk_op(record_id_iterator, "index")
 
     def bulk_delete(self, record_id_iterator):
         """Bulk delete records from index.
 
         :param record_id_iterator: Iterator yielding record UUIDs.
         """
-        self._bulk_op(record_id_iterator, 'delete')
+        self._bulk_op(record_id_iterator, "delete")
 
     def process_bulk_queue(self, es_bulk_kwargs=None):
         """Process bulk indexing queue.
@@ -259,7 +262,7 @@ class RecordIndexer(object):
                 routing_key=self.mq_routing_key,
             )
 
-            req_timeout = current_app.config['INDEXER_BULK_REQUEST_TIMEOUT']
+            req_timeout = current_app.config["INDEXER_BULK_REQUEST_TIMEOUT"]
 
             es_bulk_kwargs = es_bulk_kwargs or {}
             count = bulk(
@@ -268,8 +271,7 @@ class RecordIndexer(object):
                 stats_only=True,
                 request_timeout=req_timeout,
                 expand_action_callback=(
-                    _es7_expand_action if ES_VERSION[0] >= 7
-                    else default_expand_action
+                    _es7_expand_action if ES_VERSION[0] >= 7 else default_expand_action
                 ),
                 **es_bulk_kwargs
             )
@@ -319,7 +321,7 @@ class RecordIndexer(object):
         for message in message_iterator:
             payload = message.decode()
             try:
-                if payload['op'] == 'delete':
+                if payload["op"] == "delete":
                     yield self._delete_action(payload)
                 else:
                     yield self._index_action(payload)
@@ -329,8 +331,9 @@ class RecordIndexer(object):
             except Exception:
                 message.reject()
                 current_app.logger.error(
-                    "Failed to index record {0}".format(payload.get('id')),
-                    exc_info=True)
+                    "Failed to index record {0}".format(payload.get("id")),
+                    exc_info=True,
+                )
 
     def _delete_action(self, payload):
         """Bulk delete action.
@@ -339,26 +342,25 @@ class RecordIndexer(object):
         :returns: Dictionary defining an Elasticsearch bulk 'delete' action.
         """
         kwargs = {}
-        index, doc_type = payload.get('index'), payload.get('doc_type')
+        index, doc_type = payload.get("index"), payload.get("doc_type")
         if not (index and doc_type):
-            record = self.record_cls.get_record(
-                payload['id'], with_deleted=True)
+            record = self.record_cls.get_record(payload["id"], with_deleted=True)
             index, doc_type = self.record_to_index(record)
-            kwargs['_version'] = record.revision_id
-            kwargs['_version_type'] = self._version_type
+            kwargs["_version"] = record.revision_id
+            kwargs["_version_type"] = self._version_type
         else:
             # Allow version to be sent in the payload (but only use if we
             # haven't loaded the record.
-            if 'version' in payload:
-                kwargs['_version'] = payload['version']
-                kwargs['_version_type'] = self._version_type
+            if "version" in payload:
+                kwargs["_version"] = payload["version"]
+                kwargs["_version_type"] = self._version_type
         index, doc_type = self._prepare_index(index, doc_type)
 
         return {
-            '_op_type': 'delete',
-            '_index': index,
-            '_type': doc_type,
-            '_id': payload['id'],
+            "_op_type": "delete",
+            "_index": index,
+            "_type": doc_type,
+            "_id": payload["id"],
             **kwargs,
         }
 
@@ -368,7 +370,7 @@ class RecordIndexer(object):
         :param payload: Decoded message body.
         :returns: Dictionary defining an Elasticsearch bulk 'index' action.
         """
-        record = self.record_cls.get_record(payload['id'])
+        record = self.record_cls.get_record(payload["id"])
         index, doc_type = self.record_to_index(record)
 
         arguments = {}
@@ -376,13 +378,13 @@ class RecordIndexer(object):
         index, doc_type = self._prepare_index(index, doc_type)
 
         action = {
-            '_op_type': 'index',
-            '_index': index,
-            '_type': doc_type,
-            '_id': str(record.id),
-            '_version': record.revision_id,
-            '_version_type': self._version_type,
-            '_source': body
+            "_op_type": "index",
+            "_index": index,
+            "_type": doc_type,
+            "_id": str(record.id),
+            "_version": record.revision_id,
+            "_version_type": self._version_type,
+            "_source": body,
         }
         action.update(arguments)
 
@@ -392,8 +394,7 @@ class RecordIndexer(object):
         """Prepare the index/doc_type before an operation."""
         return build_alias_name(index), doc_type
 
-    def _prepare_record(self, record, index, doc_type, arguments=None,
-                        **kwargs):
+    def _prepare_record(self, record, index, doc_type, arguments=None, **kwargs):
         """Prepare record data for indexing.
 
         Invenio-Records is evolving and preparing an Elasticsearch source
@@ -412,7 +413,7 @@ class RecordIndexer(object):
         """
         # New-style record dumping - we use the Record.enable_jsonref flag on
         # the Record to control if we use the new simplified dumping.
-        if not getattr(record, 'enable_jsonref', True):
+        if not getattr(record, "enable_jsonref", True):
             # If dumper is None, dumps() will use the default configured dumper
             # on the Record class.
             return record.dumps(dumper=self.record_dumper)
@@ -422,15 +423,17 @@ class RecordIndexer(object):
         # is backward compatible for new-style records. Also, we're adding
         # extra information into the record like _created and _updated
         # afterwards, which the Record.dumps() have no control over.
-        if current_app.config['INDEXER_REPLACE_REFS']:
+        if current_app.config["INDEXER_REPLACE_REFS"]:
             data = copy.deepcopy(record.replace_refs())
         else:
             data = record.dumps()
 
-        data['_created'] = pytz.utc.localize(record.created).isoformat() \
-            if record.created else None
-        data['_updated'] = pytz.utc.localize(record.updated).isoformat() \
-            if record.updated else None
+        data["_created"] = (
+            pytz.utc.localize(record.created).isoformat() if record.created else None
+        )
+        data["_updated"] = (
+            pytz.utc.localize(record.updated).isoformat() if record.updated else None
+        )
 
         # Allow modification of data prior to sending to Elasticsearch.
         before_record_index.send(

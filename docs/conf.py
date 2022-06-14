@@ -10,9 +10,9 @@
 
 from __future__ import print_function
 
-from invenio_indexer import __version__
-
 import sphinx.environment
+
+from invenio_indexer import __version__
 
 # -- General configuration ------------------------------------------------
 
@@ -52,9 +52,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"Invenio-Indexer"
-copyright = u"2015, CERN"
-author = u"CERN"
+project = "Invenio-Indexer"
+copyright = "2015, CERN"
+author = "CERN"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -122,10 +122,8 @@ html_theme_options = {
     "github_banner": True,
     "show_powered_by": False,
     "extra_nav_links": {
-        "invenio-indexer@GitHub":
-        "https://github.com/inveniosoftware/invenio-indexer",
-        "invenio-indexer@PyPI":
-        "https://pypi.python.org/pypi/invenio-indexer/",
+        "invenio-indexer@GitHub": "https://github.com/inveniosoftware/invenio-indexer",
+        "invenio-indexer@PyPI": "https://pypi.python.org/pypi/invenio-indexer/",
     },
 }
 
@@ -252,8 +250,8 @@ latex_documents = [
     (
         master_doc,
         "invenio-indexer.tex",
-        u"invenio-indexer Documentation",
-        u"CERN",
+        "invenio-indexer Documentation",
+        "CERN",
         "manual",
     ),
 ]
@@ -284,11 +282,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc,
-     "invenio-indexer",
-     u"invenio-indexer Documentation",
-     [author],
-     1)
+    (master_doc, "invenio-indexer", "invenio-indexer Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -304,7 +298,7 @@ texinfo_documents = [
     (
         master_doc,
         "invenio-indexer",
-        u"Invenio-Indexer Documentation",
+        "Invenio-Indexer Documentation",
         author,
         "invenio-indexer",
         "Record indexer for Invenio.",
@@ -329,8 +323,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
     "kombu": ("https://docs.celeryq.dev/projects/kombu/en/stable/", None),
-    "elasticsearch": ("https://elasticsearch-py.readthedocs.io/en/master/",
-                      None),
+    "elasticsearch": ("https://elasticsearch-py.readthedocs.io/en/master/", None),
 }
 # Autodoc configuraton.
 autoclass_content = "both"

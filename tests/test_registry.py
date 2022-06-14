@@ -20,19 +20,14 @@ def test_indexer_registry(app):
 
     # fail on duplicate id
     pytest.raises(
-        RuntimeError,
-        current_indexer_registry.register,
-        indexer_instance,
-        "test"
+        RuntimeError, current_indexer_registry.register, indexer_instance, "test"
     )
     # get indexer
     assert indexer_instance == current_indexer_registry.get("test")
     # get id
     assert "test" == current_indexer_registry.get_indexer_id(indexer_instance)
     # get id of non-registered indexer
-    pytest.raises(
-        KeyError, current_indexer_registry.get_indexer_id, RecordIndexer()
-    )
+    pytest.raises(KeyError, current_indexer_registry.get_indexer_id, RecordIndexer())
     # add a second one and get the list
     current_indexer_registry.register(indexer_instance, "test_too")
     indexers = current_indexer_registry.all().keys()

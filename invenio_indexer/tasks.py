@@ -15,9 +15,7 @@ from .proxies import current_indexer_registry
 
 
 @shared_task(ignore_result=True)
-def process_bulk_queue(
-    version_type=None, es_bulk_kwargs=None, indexer_name=None
-):
+def process_bulk_queue(version_type=None, es_bulk_kwargs=None, indexer_name=None):
     """Process bulk indexing queue.
 
     :param str version_type: Elasticsearch version type.

@@ -36,9 +36,9 @@ class InvenioIndexer(object):
         """
         self.init_config(app)
         self.registry = IndexerRegistry()
-        app.extensions['invenio-indexer'] = self
+        app.extensions["invenio-indexer"] = self
 
-        hooks = app.config.get('INDEXER_BEFORE_INDEX_HOOKS', [])
+        hooks = app.config.get("INDEXER_BEFORE_INDEX_HOOKS", [])
         for hook in hooks:
             if isinstance(hook, str):
                 hook = import_string(hook)
@@ -50,10 +50,10 @@ class InvenioIndexer(object):
         :param app: The Flask application.
         """
         for k in dir(config):
-            if k.startswith('INDEXER_'):
+            if k.startswith("INDEXER_"):
                 app.config.setdefault(k, getattr(config, k))
 
     @cached_property
     def record_to_index(self):
         """Import the configurable 'record_to_index' function."""
-        return import_string(current_app.config.get('INDEXER_RECORD_TO_INDEX'))
+        return import_string(current_app.config.get("INDEXER_RECORD_TO_INDEX"))

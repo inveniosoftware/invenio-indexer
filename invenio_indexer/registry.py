@@ -20,8 +20,7 @@ class IndexerRegistry:
         """Register a new indexer instance."""
         if indexer_id in self._indexers:
             raise RuntimeError(
-                f"Indexer with indexer id '{indexer_id}' "
-                "is already registered."
+                f"Indexer with indexer id '{indexer_id}' " "is already registered."
             )
         self._indexers[indexer_id] = indexer_instance
 

@@ -15,12 +15,14 @@ from blinker import ANY, Namespace
 
 def _with_dynamic_connect(signal):
     """Adds a `dynamic_connect()` method to blinker signals."""
-    def _dynamic_connect(self, receiver, sender=ANY, weak=True,
-                         condition_func=None, **connect_kwargs):
+
+    def _dynamic_connect(
+        self, receiver, sender=ANY, weak=True, condition_func=None, **connect_kwargs
+    ):
         """Dynamically connect a receiver to a signal based on a condition."""
+
         def _default_condition_func(sender, connect_kwargs, **signal_kwargs):
-            return all(signal_kwargs.get(k) == v
-                       for k, v in connect_kwargs.items())
+            return all(signal_kwargs.get(k) == v for k, v in connect_kwargs.items())
 
         condition_func = condition_func or _default_condition_func
 
@@ -36,8 +38,7 @@ def _with_dynamic_connect(signal):
 
 _signals = Namespace()
 
-before_record_index = _with_dynamic_connect(
-    _signals.signal('before-record-index'))
+before_record_index = _with_dynamic_connect(_signals.signal("before-record-index"))
 """Signal sent before a record is indexed.
 
 The sender is the current Flask application, and two keyword arguments are

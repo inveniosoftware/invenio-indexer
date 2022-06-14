@@ -27,7 +27,7 @@ def abort_if_false(ctx, param, value):
 
 def resultcallback(group):
     """Compatibility layer for Click 7 and 8."""
-    if hasattr(group, 'result_callback') and group.result_callback is not None:
+    if hasattr(group, "result_callback") and group.result_callback is not None:
         decorator = group.result_callback()
     else:
         # Click < 8.0
@@ -36,64 +36,77 @@ def resultcallback(group):
 
 
 @index.command()
+@click.option("--delayed", "-d", is_flag=True, help="Run indexing in background.")
 @click.option(
-    '--delayed', '-d', is_flag=True, help='Run indexing in background.')
+    "--concurrency",
+    "-c",
+    default=1,
+    type=int,
+    help="Number of concurrent indexing tasks to start.",
+)
 @click.option(
-    '--concurrency', '-c', default=1, type=int,
-    help='Number of concurrent indexing tasks to start.')
-@click.option('--queue', '-q', type=str,
-              help='Name of the celery queue used to put the tasks into.')
-@click.option('--version-type', help='Elasticsearch version type to use.')
+    "--queue",
+    "-q",
+    type=str,
+    help="Name of the celery queue used to put the tasks into.",
+)
+@click.option("--version-type", help="Elasticsearch version type to use.")
 @click.option(
-    '--raise-on-error/--skip-errors', default=True,
-    help='Controls if Elasticsearch bulk indexing errors raise an exception.')
+    "--raise-on-error/--skip-errors",
+    default=True,
+    help="Controls if Elasticsearch bulk indexing errors raise an exception.",
+)
 @with_appcontext
-def run(delayed, concurrency, version_type=None, queue=None,
-        raise_on_error=True):
+def run(delayed, concurrency, version_type=None, queue=None, raise_on_error=True):
     """Run bulk record indexing."""
     if delayed:
         celery_kwargs = {
-            'kwargs': {
-                'version_type': version_type,
-                'es_bulk_kwargs': {'raise_on_error': raise_on_error},
+            "kwargs": {
+                "version_type": version_type,
+                "es_bulk_kwargs": {"raise_on_error": raise_on_error},
             }
         }
         click.secho(
-            'Starting {0} tasks for indexing records...'.format(concurrency),
-            fg='green')
+            "Starting {0} tasks for indexing records...".format(concurrency), fg="green"
+        )
         if queue is not None:
-            celery_kwargs.update({'queue': queue})
+            celery_kwargs.update({"queue": queue})
         for c in range(0, concurrency):
             process_bulk_queue.apply_async(**celery_kwargs)
     else:
-        click.secho('Indexing records...', fg='green')
+        click.secho("Indexing records...", fg="green")
         RecordIndexer(version_type=version_type).process_bulk_queue(
-            es_bulk_kwargs={'raise_on_error': raise_on_error})
+            es_bulk_kwargs={"raise_on_error": raise_on_error}
+        )
 
 
 @index.command()
-@click.option('--yes-i-know', is_flag=True, callback=abort_if_false,
-              expose_value=False,
-              prompt='Do you really want to reindex all records?')
-@click.option('-t', '--pid-type', multiple=True, required=True)
+@click.option(
+    "--yes-i-know",
+    is_flag=True,
+    callback=abort_if_false,
+    expose_value=False,
+    prompt="Do you really want to reindex all records?",
+)
+@click.option("-t", "--pid-type", multiple=True, required=True)
 @with_appcontext
 def reindex(pid_type):
     """Reindex all records.
 
     :param pid_type: Pid type.
     """
-    click.secho('Sending records to indexing queue ...', fg='green')
+    click.secho("Sending records to indexing queue ...", fg="green")
 
-    query = (x[0] for x in PersistentIdentifier.query.filter_by(
-        object_type='rec', status=PIDStatus.REGISTERED
-    ).filter(
-        PersistentIdentifier.pid_type.in_(pid_type)
-    ).values(
-        PersistentIdentifier.object_uuid
-    ))
+    query = (
+        x[0]
+        for x in PersistentIdentifier.query.filter_by(
+            object_type="rec", status=PIDStatus.REGISTERED
+        )
+        .filter(PersistentIdentifier.pid_type.in_(pid_type))
+        .values(PersistentIdentifier.object_uuid)
+    )
     RecordIndexer().bulk_index(query)
-    click.secho('Execute "run" command to process the queue!',
-                fg='yellow')
+    click.secho('Execute "run" command to process the queue!', fg="yellow")
 
 
 @index.group(chain=True)
@@ -105,38 +118,44 @@ def queue():
 @with_appcontext
 def process_actions(actions):
     """Process queue actions."""
-    queue = current_app.config['INDEXER_MQ_QUEUE']
+    queue = current_app.config["INDEXER_MQ_QUEUE"]
     with establish_connection() as c:
         q = queue(c)
         for action in actions:
             q = action(q)
 
 
-@queue.command('init')
+@queue.command("init")
 def init_queue():
     """Initialize indexing queue."""
+
     def action(queue):
         queue.declare()
-        click.secho('Indexing queue has been initialized.', fg='green')
+        click.secho("Indexing queue has been initialized.", fg="green")
         return queue
+
     return action
 
 
-@queue.command('purge')
+@queue.command("purge")
 def purge_queue():
     """Purge indexing queue."""
+
     def action(queue):
         queue.purge()
-        click.secho('Indexing queue has been purged.', fg='green')
+        click.secho("Indexing queue has been purged.", fg="green")
         return queue
+
     return action
 
 
-@queue.command('delete')
+@queue.command("delete")
 def delete_queue():
     """Delete indexing queue."""
+
     def action(queue):
         queue.delete()
-        click.secho('Indexing queue has been deleted.', fg='green')
+        click.secho("Indexing queue has been deleted.", fg="green")
         return queue
+
     return action

@@ -16,14 +16,13 @@ INDEXER_DEFAULT_INDEX = "records-record-v1.0.0"
 INDEXER_DEFAULT_DOC_TYPE = "record-v1.0.0"
 """Default doc_type to use if no schema is defined."""
 
-INDEXER_MQ_EXCHANGE = Exchange('indexer', type='direct')
+INDEXER_MQ_EXCHANGE = Exchange("indexer", type="direct")
 """Default exchange for message queue."""
 
-INDEXER_MQ_QUEUE = Queue(
-    'indexer', exchange=INDEXER_MQ_EXCHANGE, routing_key='indexer')
+INDEXER_MQ_QUEUE = Queue("indexer", exchange=INDEXER_MQ_EXCHANGE, routing_key="indexer")
 """Default queue for message queue."""
 
-INDEXER_MQ_ROUTING_KEY = 'indexer'
+INDEXER_MQ_ROUTING_KEY = "indexer"
 """Default routing key for message queue."""
 
 INDEXER_REPLACE_REFS = True
@@ -39,7 +38,7 @@ This threshold is applied per queue, so each indexing queue would
 have a maximum of 5 consumers at the same time.
 """
 
-INDEXER_RECORD_TO_INDEX = 'invenio_indexer.utils.default_record_to_index'
+INDEXER_RECORD_TO_INDEX = "invenio_indexer.utils.default_record_to_index"
 """Provide an implemetation of record_to_index function"""
 
 INDEXER_BEFORE_INDEX_HOOKS = []

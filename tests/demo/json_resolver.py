@@ -11,7 +11,7 @@
 import jsonresolver
 
 
-@jsonresolver.route('/<path:item>', host='dx.doi.org')
+@jsonresolver.route("/<path:item>", host="dx.doi.org")
 def test_resolver(item):
     """Create a nested JSON."""
-    return {'data': item}
+    return {"data": item}
