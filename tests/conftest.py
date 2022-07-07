@@ -14,12 +14,12 @@ import tempfile
 
 import pytest
 from celery.messaging import establish_connection
-from elasticsearch_dsl import Index
 from flask import Flask
 from flask_celeryext import FlaskCeleryExt
 from invenio_db import InvenioDB, db
 from invenio_records import InvenioRecords
 from invenio_search import InvenioSearch
+from invenio_search.engine import dsl
 from sqlalchemy_utils.functions import create_database, database_exists, drop_database
 
 from invenio_indexer import InvenioIndexer
@@ -108,6 +108,6 @@ def record_cls_with_index(app):
         the same way.
         """
 
-        index = Index(app.config["INDEXER_DEFAULT_INDEX"])
+        index = dsl.Index(app.config["INDEXER_DEFAULT_INDEX"])
 
     return Record

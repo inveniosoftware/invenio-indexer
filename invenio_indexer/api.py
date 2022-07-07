@@ -13,13 +13,10 @@ from contextlib import contextmanager
 
 import pytz
 from celery import current_app as current_celery_app
-from elasticsearch import VERSION as ES_VERSION
-from elasticsearch.helpers import bulk
-from elasticsearch.helpers import expand_action as default_expand_action
-from elasticsearch_dsl import Index
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
+from invenio_search.engine import dsl, search, uses_es7
 from invenio_search.utils import build_alias_name
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
@@ -28,6 +25,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from .proxies import current_record_to_index
 from .signals import before_record_index
 from .utils import _es7_expand_action
+
+# the tests expect this to be present
+bulk = search.helpers.bulk
 
 
 class Producer(KombuProducer):
@@ -177,7 +177,7 @@ class RecordIndexer(object):
         """
         if not index:
             index_name = self.record_cls.index._name
-        elif isinstance(index, Index):
+        elif isinstance(index, dsl.Index):
             index_name = index._name
         else:
             index_name = index
@@ -194,7 +194,7 @@ class RecordIndexer(object):
         """
         if not index:
             index_name = self.record_cls.index._name
-        elif isinstance(index, Index):
+        elif isinstance(index, dsl.Index):
             index_name = index._name
         else:
             index_name = index
@@ -265,14 +265,16 @@ class RecordIndexer(object):
             req_timeout = current_app.config["INDEXER_BULK_REQUEST_TIMEOUT"]
 
             es_bulk_kwargs = es_bulk_kwargs or {}
+            expand_action_cb = search.helpers.expand_action
+            if uses_es7():
+                expand_action_cb = _es7_expand_action
+
             count = bulk(
                 self.client,
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
                 request_timeout=req_timeout,
-                expand_action_callback=(
-                    _es7_expand_action if ES_VERSION[0] >= 7 else default_expand_action
-                ),
+                expand_action_callback=expand_action_cb,
                 **es_bulk_kwargs
             )
 

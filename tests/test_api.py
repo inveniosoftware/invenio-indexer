@@ -14,10 +14,9 @@ from unittest.mock import MagicMock, patch
 
 import pytz
 from celery.messaging import establish_connection
-from elasticsearch import VERSION as ES_VERSION
-from elasticsearch_dsl import Index
 from invenio_db import db
 from invenio_records.api import Record
+from invenio_search.engine import dsl, uses_es7
 from jsonresolver import JSONResolver
 from jsonresolver.contrib.jsonref import json_loader_factory
 from kombu.compat import Consumer
@@ -25,7 +24,7 @@ from kombu.compat import Consumer
 from invenio_indexer.api import BulkRecordIndexer, RecordIndexer
 from invenio_indexer.signals import before_record_index
 
-lt_es7 = ES_VERSION[0] < 7
+lt_es7 = not uses_es7()
 
 
 def test_indexer_bulk_index(app, queue):
@@ -269,7 +268,7 @@ def test_refresh_with_index_obj(app):
         index_name = app.config["INDEXER_DEFAULT_INDEX"]
 
         ri = RecordIndexer(search_client=client_mock, version_type="force")
-        ri.refresh(index=Index(index_name))
+        ri.refresh(index=dsl.Index(index_name))
 
         client_mock.indices.refresh.assert_called_with(index=index_name)
 

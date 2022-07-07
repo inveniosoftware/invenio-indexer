@@ -12,10 +12,10 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytz
-from elasticsearch import VERSION as ES_VERSION
 from flask import Flask
 from invenio_db import db
 from invenio_records import Record
+from invenio_search.engine import uses_es7
 
 from invenio_indexer import InvenioIndexer
 from invenio_indexer.api import RecordIndexer
@@ -24,7 +24,7 @@ from invenio_indexer.signals import before_record_index
 _global_magic_hook = MagicMock()
 """Iternal importable magic hook instance."""
 
-lt_es7 = ES_VERSION[0] < 7
+lt_es7 = not uses_es7()
 
 
 def test_version():
