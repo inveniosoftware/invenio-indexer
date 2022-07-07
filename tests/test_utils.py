@@ -11,7 +11,7 @@
 from unittest.mock import patch
 
 import pytest
-from elasticsearch import VERSION as ES_VERSION
+from invenio_search.engine import uses_es7
 
 from invenio_indexer.utils import schema_to_index
 
@@ -19,7 +19,7 @@ from invenio_indexer.utils import schema_to_index
 def test_schema_to_index_with_names(app):
     """Test that prefix is added to the index when creating it."""
     result = schema_to_index("default.json", index_names=["default"])
-    assert result == ("default", "_doc" if ES_VERSION[0] >= 7 else "default")
+    assert result == ("default", "_doc" if uses_es7() else "default")
 
 
 @pytest.mark.parametrize(
@@ -55,6 +55,6 @@ def test_schema_to_index_with_names(app):
 def test_schema_to_index(schema, expected, index_names, app):
     """Test the expected value of schema to index."""
     result = schema_to_index(schema, index_names=index_names)
-    if ES_VERSION[0] >= 7 and expected[0]:
+    if uses_es7() and expected[0]:
         expected = (expected[0], "_doc")
     assert result == expected

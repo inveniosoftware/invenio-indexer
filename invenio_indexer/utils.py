@@ -11,9 +11,9 @@
 import os
 from functools import wraps
 
-from elasticsearch import VERSION as ES_VERSION
 from flask import current_app
 from invenio_search import current_search
+from invenio_search.engine import uses_es7
 from invenio_search.utils import build_index_from_parts
 
 
@@ -27,7 +27,7 @@ def schema_to_index(schema, index_names=None):
     parts = schema.split("/")
     doc_type, ext = os.path.splitext(parts[-1])
     parts[-1] = doc_type
-    if ES_VERSION[0] >= 7:
+    if uses_es7():
         doc_type = "_doc"
 
     if ext not in {
@@ -69,7 +69,7 @@ def default_record_to_index(record):
             current_app.config["INDEXER_DEFAULT_DOC_TYPE"],
         )
 
-    if ES_VERSION[0] >= 7:
+    if uses_es7():
         doc_type = "_doc"
 
     return index, doc_type
