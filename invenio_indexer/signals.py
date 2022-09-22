@@ -48,7 +48,7 @@ provided:
 - ``record``: The record being indexed.
 - ``index``: The index in which the record will be indexed.
 - ``doc_type``: The doc_type for the record.
-- ``arguments``: The arguments to pass to Elasticsearch for indexing.
+- ``arguments``: The arguments to pass to the search engine for indexing.
 - ``**kwargs``: Extra arguments.
 
 This signal also has a ``.dynamic_connect()`` method which allows some more

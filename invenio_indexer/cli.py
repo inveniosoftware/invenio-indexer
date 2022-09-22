@@ -50,11 +50,11 @@ def resultcallback(group):
     type=str,
     help="Name of the celery queue used to put the tasks into.",
 )
-@click.option("--version-type", help="Elasticsearch version type to use.")
+@click.option("--version-type", help="The search engine version type to use.")
 @click.option(
     "--raise-on-error/--skip-errors",
     default=True,
-    help="Controls if Elasticsearch bulk indexing errors raise an exception.",
+    help="Controls if the search engine bulk indexing errors raise an exception.",
 )
 @with_appcontext
 def run(delayed, concurrency, version_type=None, queue=None, raise_on_error=True):
@@ -63,7 +63,7 @@ def run(delayed, concurrency, version_type=None, queue=None, raise_on_error=True
         celery_kwargs = {
             "kwargs": {
                 "version_type": version_type,
-                "es_bulk_kwargs": {"raise_on_error": raise_on_error},
+                "search_bulk_kwargs": {"raise_on_error": raise_on_error},
             }
         }
         click.secho(
@@ -76,7 +76,7 @@ def run(delayed, concurrency, version_type=None, queue=None, raise_on_error=True
     else:
         click.secho("Indexing records...", fg="green")
         RecordIndexer(version_type=version_type).process_bulk_queue(
-            es_bulk_kwargs={"raise_on_error": raise_on_error}
+            search_bulk_kwargs={"raise_on_error": raise_on_error}
         )
 
 

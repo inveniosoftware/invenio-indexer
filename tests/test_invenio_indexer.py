@@ -15,7 +15,6 @@ import pytz
 from flask import Flask
 from invenio_db import db
 from invenio_records import Record
-from invenio_search.engine import uses_es7
 
 from invenio_indexer import InvenioIndexer
 from invenio_indexer.api import RecordIndexer
@@ -23,8 +22,6 @@ from invenio_indexer.signals import before_record_index
 
 _global_magic_hook = MagicMock()
 """Iternal importable magic hook instance."""
-
-lt_es7 = not uses_es7()
 
 
 def test_version():
@@ -65,10 +62,9 @@ def test_hook_initialization(base_app):
         client_mock = MagicMock()
         RecordIndexer(search_client=client_mock, version_type="force").index(record)
         args = (app,)
-        doc_type = app.config["INDEXER_DEFAULT_DOC_TYPE"] if lt_es7 else "_doc"
         kwargs = dict(
             index=app.config["INDEXER_DEFAULT_INDEX"],
-            doc_type=doc_type,
+            doc_type="_doc",
             arguments={},
             record=record,
             json={
@@ -84,7 +80,7 @@ def test_hook_initialization(base_app):
             version=0,
             version_type="force",
             index=app.config["INDEXER_DEFAULT_INDEX"],
-            doc_type=doc_type,
+            doc_type="_doc",
             body={
                 "title": "Test",
                 "_created": pytz.utc.localize(record.created).isoformat(),
@@ -101,7 +97,6 @@ def test_index_prefixing(base_app):
     ext = InvenioIndexer(app)
 
     default_index = app.config["INDEXER_DEFAULT_INDEX"]
-    default_doc_type = app.config["INDEXER_DEFAULT_DOC_TYPE"]
 
     with app.app_context():
         with patch("invenio_records.api._records_state.validate"):
@@ -126,7 +121,7 @@ def test_index_prefixing(base_app):
                 version=0,
                 version_type="external_gte",
                 index="test-" + default_index,
-                doc_type=default_doc_type if lt_es7 else "_doc",
+                doc_type="_doc",
                 body={
                     "title": "Test",
                     "_created": pytz.utc.localize(record.created).isoformat(),
@@ -142,7 +137,7 @@ def test_index_prefixing(base_app):
                 },
                 record=record,
                 index=default_index,  # non-prefixed index passed to receiver
-                doc_type=default_doc_type if lt_es7 else "_doc",
+                doc_type="_doc",
                 arguments={},
             )
 
@@ -152,7 +147,7 @@ def test_index_prefixing(base_app):
                 version=0,
                 version_type="external_gte",
                 index="test-records-authorities-authority-v1.0.0",
-                doc_type="authority-v1.0.0" if lt_es7 else "_doc",
+                doc_type="_doc",
                 body={
                     "$schema": "/records/authorities/authority-v1.0.0.json",
                     "title": "Test with schema",
@@ -170,14 +165,14 @@ def test_index_prefixing(base_app):
                 },
                 record=record2,
                 index="records-authorities-authority-v1.0.0",  # no prefix
-                doc_type="authority-v1.0.0" if lt_es7 else "_doc",
+                doc_type="_doc",
                 arguments={},
             )
             RecordIndexer(search_client=client_mock).delete(record3)
             client_mock.delete.assert_called_with(
                 id=str(record3.id),
                 index="test-" + default_index,
-                doc_type=default_doc_type if lt_es7 else "_doc",
+                doc_type="_doc",
                 version=record3.revision_id,
                 version_type="external_gte",
             )
