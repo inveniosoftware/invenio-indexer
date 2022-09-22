@@ -8,12 +8,12 @@
 
 """Record indexer for Invenio.
 
-Invenio-Indexer is responsible for sending records for indexing in
-Elasticsearch so that the records can be searched. Invenio-Indexer can either
+Invenio-Indexer is responsible for sending records for indexing to the search
+engine so that the records can be searched. Invenio-Indexer can either
 send the records in bulk or individually. Bulk indexing is far superior in
 performance if multiple records needs to be indexed at the price of delay. Bulk
 indexing works by queuing records in a message queue, which is then consumed
-and sent to Elasticsearch.
+and sent to the search engine.
 
 Initialization
 --------------
@@ -46,7 +46,7 @@ application context so let's push one:
 >>> ctx.push()
 
 Also, for the examples to work we need to create the database tables and
-Elasticsearch indexes (note, in this example we use an in-memory SQLite
+the search engine indexes (note, in this example we use an in-memory SQLite
 database):
 
 >>> from invenio_db import db
@@ -70,7 +70,7 @@ Now, let's index the record:
 >>> indexer = RecordIndexer()
 >>> res = indexer.index(record)
 
-By default, records are sent to the Elasticsearch index defined by the
+By default, records are sent to the search engine index defined by the
 configuration variable ``INDEXER_DEFAULT_INDEX``. If the record however has a
 ``$schema`` attribute, the index is automatically determined from this. E.g.
 the following record:
@@ -78,7 +78,7 @@ the following record:
 >>> r = Record({
 ...     '$schema': 'http://example.org/records/record-v1.0.0.json'})
 
-Would be indexed in the following Elasticsearch index/doctype:
+Would be indexed in the following search engine index/doctype:
 
 >>> index, doc_type = indexer.record_to_index(record)
 
@@ -158,8 +158,8 @@ application)
   data that will be sent to the index. Modify this dictionary in order to
   change the document.
 * ``record``: The record from which the JSON was dumped.
-* ``index``: The Elasticsearch index in which the record will be indexed.
-* ``doc_type``: The Elasticsearch document type for the record.
+* ``index``: The search engine index in which the record will be indexed.
+* ``doc_type``: The search engine document type for the record.
 * ``arguments``: The arguments that will be passed to the ``index()`` call.
 
 Connecting the receiver to the signal is as simple as (do this e.g. in your

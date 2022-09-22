@@ -39,7 +39,7 @@ have a maximum of 5 consumers at the same time.
 """
 
 INDEXER_RECORD_TO_INDEX = "invenio_indexer.utils.default_record_to_index"
-"""Provide an implemetation of record_to_index function"""
+"""Provide an implementation of record_to_index function"""
 
 INDEXER_BEFORE_INDEX_HOOKS = []
 """List of automatically connected hooks (function or importable string)."""

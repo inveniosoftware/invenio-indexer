@@ -16,7 +16,7 @@ from celery import current_app as current_celery_app
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
-from invenio_search.engine import dsl, search, uses_es7
+from invenio_search.engine import dsl, search
 from invenio_search.utils import build_alias_name
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
@@ -24,7 +24,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from .proxies import current_record_to_index
 from .signals import before_record_index
-from .utils import _es7_expand_action
 
 # the tests expect this to be present
 bulk = search.helpers.bulk
@@ -43,7 +42,7 @@ class Producer(KombuProducer):
 
 
 class RecordIndexer(object):
-    r"""Provide an interface for indexing records in Elasticsearch.
+    r"""Provide an interface for indexing records in the search engine.
 
     Bulk indexing works by queuing requests for indexing records and processing
     these requests in bulk.
@@ -72,18 +71,18 @@ class RecordIndexer(object):
     ):
         """Initialize indexer.
 
-        :param search_client: Elasticsearch client.
+        :param search_client: search engine client.
             (Default: ``current_search_client``)
         :param exchange: A :class:`kombu.Exchange` instance for message queue.
         :param queue: A :class:`kombu.Queue` instance for message queue.
         :param routing_key: Routing key for message queue.
-        :param version_type: Elasticsearch version type.
+        :param version_type: search engine version type.
             (Default: ``external_gte``)
         :param record_to_index: Function to extract the index and doc_type
             from the record.
         :param record_cls: Record class used for retriving and dumping records.
             If the ``Record.enable_jsonref`` flag is False, new-style record
-            dumping will be used for creating the Elasticsearch source
+            dumping will be used for creating the search engine source
             document.
         :param record_dumper: Dumper instance to use for dumping the record.
             Only has an effect for new-style record dumping.
@@ -207,8 +206,7 @@ class RecordIndexer(object):
         """Delete a record.
 
         :param record: Record instance.
-        :param kwargs: Passed to
-            :meth:`elasticsearch:elasticsearch.Elasticsearch.delete`.
+        :param kwargs: Passed to `search.delete`.
         """
         index, doc_type = self.record_to_index(record)
         index, doc_type = self._prepare_index(index, doc_type)
@@ -248,11 +246,10 @@ class RecordIndexer(object):
         """
         self._bulk_op(record_id_iterator, "delete")
 
-    def process_bulk_queue(self, es_bulk_kwargs=None):
+    def process_bulk_queue(self, search_bulk_kwargs=None):
         """Process bulk indexing queue.
 
-        :param dict es_bulk_kwargs: Passed to
-            :func:`elasticsearch:elasticsearch.helpers.bulk`.
+        :param dict search_bulk_kwargs: Passed to `search.helpers.bulk`.
         """
         with current_celery_app.pool.acquire(block=True) as conn:
             consumer = Consumer(
@@ -264,18 +261,15 @@ class RecordIndexer(object):
 
             req_timeout = current_app.config["INDEXER_BULK_REQUEST_TIMEOUT"]
 
-            es_bulk_kwargs = es_bulk_kwargs or {}
-            expand_action_cb = search.helpers.expand_action
-            if uses_es7():
-                expand_action_cb = _es7_expand_action
+            search_bulk_kwargs = search_bulk_kwargs or {}
 
             count = bulk(
                 self.client,
                 self._actionsiter(consumer.iterqueue()),
                 stats_only=True,
                 request_timeout=req_timeout,
-                expand_action_callback=expand_action_cb,
-                **es_bulk_kwargs
+                expand_action_callback=search.helpers.expand_action,
+                **search_bulk_kwargs
             )
 
             consumer.close()
@@ -297,13 +291,13 @@ class RecordIndexer(object):
     # Low-level implementation
     #
     def _bulk_op(self, record_id_iterator, op_type, index=None, doc_type=None):
-        """Index record in Elasticsearch asynchronously.
+        """Index record in the search engine asynchronously.
 
         :param record_id_iterator: dIterator that yields record UUIDs.
         :param op_type: Indexing operation (one of ``index``, ``create``,
             ``delete`` or ``update``).
-        :param index: The Elasticsearch index. (Default: ``None``)
-        :param doc_type: The Elasticsearch doc_type. (Default: ``None``)
+        :param index: The search engine index. (Default: ``None``)
+        :param doc_type: The search engine doc_type. (Default: ``None``)
         """
         with self.create_producer() as producer:
             for rec in record_id_iterator:
@@ -341,7 +335,7 @@ class RecordIndexer(object):
         """Bulk delete action.
 
         :param payload: Decoded message body.
-        :returns: Dictionary defining an Elasticsearch bulk 'delete' action.
+        :returns: Dictionary defining the search engine bulk 'delete' action.
         """
         kwargs = {}
         index, doc_type = payload.get("index"), payload.get("doc_type")
@@ -370,7 +364,7 @@ class RecordIndexer(object):
         """Bulk index action.
 
         :param payload: Decoded message body.
-        :returns: Dictionary defining an Elasticsearch bulk 'index' action.
+        :returns: Dictionary defining the search engine bulk 'index' action.
         """
         record = self.record_cls.get_record(payload["id"])
         index, doc_type = self.record_to_index(record)
@@ -399,7 +393,7 @@ class RecordIndexer(object):
     def _prepare_record(self, record, index, doc_type, arguments=None, **kwargs):
         """Prepare record data for indexing.
 
-        Invenio-Records is evolving and preparing an Elasticsearch source
+        Invenio-Records is evolving and preparing the search engine source
         document is now a responsibility of the Record class. For backward
         compatibility, we use the ``Record.enable_jsonref`` flag to control
         if we use the new record dumpers feature from Invenio-Records. Set the
@@ -407,11 +401,11 @@ class RecordIndexer(object):
         style record dumping.
 
         :param record: The record to prepare.
-        :param index: The Elasticsearch index.
-        :param doc_type: The Elasticsearch document type.
-        :param arguments: The arguments to send to Elasticsearch upon indexing.
+        :param index: The search engine index.
+        :param doc_type: The search engine document type.
+        :param arguments: The arguments to send to the search engine upon indexing.
         :param **kwargs: Extra parameters.
-        :returns: The Elasticsearch source document.
+        :returns: The search engine source document.
         """
         # New-style record dumping - we use the Record.enable_jsonref flag on
         # the Record to control if we use the new simplified dumping.
@@ -437,7 +431,7 @@ class RecordIndexer(object):
             pytz.utc.localize(record.updated).isoformat() if record.updated else None
         )
 
-        # Allow modification of data prior to sending to Elasticsearch.
+        # Allow modification of data prior to sending to the search engine.
         before_record_index.send(
             current_app._get_current_object(),
             json=data,
@@ -452,7 +446,7 @@ class RecordIndexer(object):
 
 
 class BulkRecordIndexer(RecordIndexer):
-    r"""Provide an interface for indexing records in Elasticsearch.
+    r"""Provide an interface for indexing records in the search engine.
 
     Uses bulk indexing by default.
     """
