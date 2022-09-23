@@ -181,6 +181,6 @@ If specific types of records have different rules (e.g. in case you had
 from .ext import InvenioIndexer
 from .proxies import current_record_to_index
 
-__version__ = "1.2.7"
+__version__ = "2.0.0"
 
 __all__ = ("__version__", "InvenioIndexer", "current_record_to_index")

@@ -8,6 +8,13 @@
 Changes
 =======
 
+Version 2.0.0 (released 2022-09-23)
+
+- Integrate invenio-search v2, add support to OpenSearch
+- Require Elasticsearch >= 7.5
+- Remove old versions of Elasticsearch mappings
+- Breaking: rename kwarg param `es_bulk_kwargs` to `search_bulk_kwargs`
+
 Version 1.2.7 (released 2022-05-17)
 
 - Add exists method to RecordIndexer API class.
