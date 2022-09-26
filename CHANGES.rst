@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 2.0.1 (released 2022-09-26)
+
+- Bump upper pin of invenio-records
+
 Version 2.0.0 (released 2022-09-23)
 
 - Integrate invenio-search v2, add support to OpenSearch
