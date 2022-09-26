@@ -49,7 +49,7 @@ class RecordIndexer(object):
     """
 
     record_cls = Record
-    """Record class used for retriving and dumping records.
+    """Record class used for retrieving and dumping records.
 
     You can either subclass and overwrite this attribute, or provide the record
     class to the constructor.
