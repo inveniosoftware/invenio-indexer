@@ -58,7 +58,7 @@ def test_reindex(app):
         )
         db.session.commit()
         indexer = RecordIndexer()
-        index, doc_type = indexer.record_to_index(record1)
+        index = indexer.record_to_index(record1)
 
         # Make sure the index doesn't exist at the beginning (it was not
         # preserved by accident from some other tests)

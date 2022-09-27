@@ -9,6 +9,7 @@
 """API for indexing of records."""
 
 import copy
+import warnings
 from contextlib import contextmanager
 
 import pytz
@@ -16,7 +17,7 @@ from celery import current_app as current_celery_app
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
-from invenio_search.engine import dsl, search
+from invenio_search.engine import check_os_version, dsl, search
 from invenio_search.utils import build_alias_name
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
@@ -78,8 +79,7 @@ class RecordIndexer(object):
         :param routing_key: Routing key for message queue.
         :param version_type: search engine version type.
             (Default: ``external_gte``)
-        :param record_to_index: Function to extract the index and doc_type
-            from the record.
+        :param record_to_index: Function to extract the index from the record.
         :param record_cls: Record class used for retriving and dumping records.
             If the ``Record.enable_jsonref`` flag is False, new-style record
             dumping will be used for creating the search engine source
@@ -100,12 +100,25 @@ class RecordIndexer(object):
             self.record_dumper = record_dumper
 
     def record_to_index(self, record):
-        """Get index/doc_type given a record.
+        """Get the index, given a record.
 
         :param record: The record where to look for the information.
-        :returns: A tuple (index, doc_type).
+        :returns: The index.
         """
-        return self._record_to_index(record)
+        result = self._record_to_index(record)
+        if isinstance(result, tuple):
+            warnings.warn(
+                (
+                    "The 'record_to_index' function is no longer expected to return "
+                    "a tuple (index, doc_type), instead it should only return the "
+                    "index. Support for the tuple will be removed in a future version "
+                    "of 'invenio-indexer'."
+                ),
+                DeprecationWarning,
+            )
+            result, _ = result
+
+        return result
 
     @property
     def mq_queue(self):
@@ -145,19 +158,18 @@ class RecordIndexer(object):
 
         :param record: Record instance.
         """
-        index, doc_type = self.record_to_index(record)
+        index = self.record_to_index(record)
         arguments = arguments or {}
-        body = self._prepare_record(record, index, doc_type, arguments, **kwargs)
-        index, doc_type = self._prepare_index(index, doc_type)
+        body = self._prepare_record(record, index, arguments, **kwargs)
+        index = self._prepare_index(index)
 
         return self.client.index(
             id=str(record.id),
             version=record.revision_id,
             version_type=self._version_type,
             index=index,
-            doc_type=doc_type,
             body=body,
-            **arguments
+            **arguments,
         )
 
     def index_by_id(self, record_uuid, **kwargs):
@@ -208,8 +220,8 @@ class RecordIndexer(object):
         :param record: Record instance.
         :param kwargs: Passed to `search.delete`.
         """
-        index, doc_type = self.record_to_index(record)
-        index, doc_type = self._prepare_index(index, doc_type)
+        index = self.record_to_index(record)
+        index = self._prepare_index(index)
 
         # Pop version arguments for backward compatibility if they were
         # explicit set to None in the function call.
@@ -220,9 +232,7 @@ class RecordIndexer(object):
             kwargs.setdefault("version", record.revision_id)
             kwargs.setdefault("version_type", self._version_type)
 
-        return self.client.delete(
-            id=str(record.id), index=index, doc_type=doc_type, **kwargs
-        )
+        return self.client.delete(id=str(record.id), index=index, **kwargs)
 
     def delete_by_id(self, record_uuid, **kwargs):
         """Delete record from index by record identifier.
@@ -269,7 +279,7 @@ class RecordIndexer(object):
                 stats_only=True,
                 request_timeout=req_timeout,
                 expand_action_callback=search.helpers.expand_action,
-                **search_bulk_kwargs
+                **search_bulk_kwargs,
             )
 
             consumer.close()
@@ -290,14 +300,13 @@ class RecordIndexer(object):
     #
     # Low-level implementation
     #
-    def _bulk_op(self, record_id_iterator, op_type, index=None, doc_type=None):
+    def _bulk_op(self, record_id_iterator, op_type, index=None):
         """Index record in the search engine asynchronously.
 
         :param record_id_iterator: dIterator that yields record UUIDs.
         :param op_type: Indexing operation (one of ``index``, ``create``,
             ``delete`` or ``update``).
         :param index: The search engine index. (Default: ``None``)
-        :param doc_type: The search engine doc_type. (Default: ``None``)
         """
         with self.create_producer() as producer:
             for rec in record_id_iterator:
@@ -305,7 +314,6 @@ class RecordIndexer(object):
                     id=str(rec),
                     op=op_type,
                     index=index,
-                    doc_type=doc_type,
                 )
                 producer.publish(data, declare=[self.mq_queue])
 
@@ -338,10 +346,10 @@ class RecordIndexer(object):
         :returns: Dictionary defining the search engine bulk 'delete' action.
         """
         kwargs = {}
-        index, doc_type = payload.get("index"), payload.get("doc_type")
-        if not (index and doc_type):
+        index = payload.get("index")
+        if not index:
             record = self.record_cls.get_record(payload["id"], with_deleted=True)
-            index, doc_type = self.record_to_index(record)
+            index = self.record_to_index(record)
             kwargs["_version"] = record.revision_id
             kwargs["_version_type"] = self._version_type
         else:
@@ -350,12 +358,11 @@ class RecordIndexer(object):
             if "version" in payload:
                 kwargs["_version"] = payload["version"]
                 kwargs["_version_type"] = self._version_type
-        index, doc_type = self._prepare_index(index, doc_type)
+        index = self._prepare_index(index)
 
         return {
             "_op_type": "delete",
             "_index": index,
-            "_type": doc_type,
             "_id": payload["id"],
             **kwargs,
         }
@@ -367,16 +374,15 @@ class RecordIndexer(object):
         :returns: Dictionary defining the search engine bulk 'index' action.
         """
         record = self.record_cls.get_record(payload["id"])
-        index, doc_type = self.record_to_index(record)
+        index = self.record_to_index(record)
 
         arguments = {}
-        body = self._prepare_record(record, index, doc_type, arguments)
-        index, doc_type = self._prepare_index(index, doc_type)
+        body = self._prepare_record(record, index, arguments)
+        index = self._prepare_index(index)
 
         action = {
             "_op_type": "index",
             "_index": index,
-            "_type": doc_type,
             "_id": str(record.id),
             "_version": record.revision_id,
             "_version_type": self._version_type,
@@ -386,11 +392,11 @@ class RecordIndexer(object):
 
         return action
 
-    def _prepare_index(self, index, doc_type):
-        """Prepare the index/doc_type before an operation."""
-        return build_alias_name(index), doc_type
+    def _prepare_index(self, index):
+        """Prepare the index before an operation."""
+        return build_alias_name(index)
 
-    def _prepare_record(self, record, index, doc_type, arguments=None, **kwargs):
+    def _prepare_record(self, record, index, arguments=None, **kwargs):
         """Prepare record data for indexing.
 
         Invenio-Records is evolving and preparing the search engine source
@@ -402,7 +408,6 @@ class RecordIndexer(object):
 
         :param record: The record to prepare.
         :param index: The search engine index.
-        :param doc_type: The search engine document type.
         :param arguments: The arguments to send to the search engine upon indexing.
         :param **kwargs: Extra parameters.
         :returns: The search engine source document.
@@ -437,9 +442,8 @@ class RecordIndexer(object):
             json=data,
             record=record,
             index=index,
-            doc_type=doc_type,
             arguments={} if arguments is None else arguments,
-            **kwargs
+            **kwargs,
         )
 
         return data

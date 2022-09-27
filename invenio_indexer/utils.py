@@ -17,11 +17,11 @@ from invenio_search.utils import build_index_from_parts
 
 
 def schema_to_index(schema, index_names=None):
-    """Get index/doc_type given a schema URL.
+    """Get index given a schema URL.
 
     :param schema: The schema name
     :param index_names: A list of index name.
-    :returns: A tuple containing (index, doc_type).
+    :returns: The index.
     """
     parts = schema.split("/")
     doc_type, ext = os.path.splitext(parts[-1])
@@ -59,12 +59,6 @@ def default_record_to_index(record):
     if isinstance(schema, dict):
         schema = schema.get("$ref", "")
 
-    index, doc_type = schema_to_index(schema, index_names=index_names)
+    index, _ = schema_to_index(schema, index_names=index_names)
 
-    if not (index and doc_type):
-        index, doc_type = (
-            current_app.config["INDEXER_DEFAULT_INDEX"],
-            current_app.config["INDEXER_DEFAULT_DOC_TYPE"],
-        )
-
-    return index, "_doc"
+    return index or current_app.config["INDEXER_DEFAULT_INDEX"]

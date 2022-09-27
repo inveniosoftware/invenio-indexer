@@ -39,7 +39,6 @@ def base_app(request):
         CELERY_TASK_EAGER_PROPAGATES=True,
         CELERY_RESULT_BACKEND="cache",
         INDEXER_DEFAULT_INDEX="records-default-v1.0.0",
-        INDEXER_DEFAULT_DOC_TYPE="default-v1.0.0",
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             "SQLALCHEMY_DATABASE_URI", "sqlite:///test.db"
         ),
