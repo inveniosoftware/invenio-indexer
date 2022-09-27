@@ -80,7 +80,7 @@ the following record:
 
 Would be indexed in the following search engine index/doctype:
 
->>> index, doc_type = indexer.record_to_index(record)
+>>> index = indexer.record_to_index(record)
 
 Bulk indexing
 -------------
@@ -147,7 +147,7 @@ First write a signal receiver. In the example below, we remove the attribute
 ``_internal`` if it exists in the record:
 
 >>> def indexer_receiver(sender, json=None, record=None,
-...                      index=None, doc_type=None, arguments=None, **kwargs):
+...                      index=None, arguments=None, **kwargs):
 ...     if '_internal' in json:
 ...         del json['_internal']
 
@@ -159,7 +159,6 @@ application)
   change the document.
 * ``record``: The record from which the JSON was dumped.
 * ``index``: The search engine index in which the record will be indexed.
-* ``doc_type``: The search engine document type for the record.
 * ``arguments``: The arguments that will be passed to the ``index()`` call.
 
 Connecting the receiver to the signal is as simple as (do this e.g. in your

@@ -59,11 +59,10 @@ def test_delete_action(app):
     with app.app_context():
         testid = str(uuid.uuid4())
         action = RecordIndexer()._delete_action(
-            dict(id=testid, op="delete", index="idx", doc_type="doc")
+            dict(id=testid, op="delete", index="idx")
         )
         assert action["_op_type"] == "delete"
         assert action["_index"] == "idx"
-        assert action["_type"] == "doc"
         assert action["_id"] == testid
 
         # Skip JSONSchema validation
@@ -76,23 +75,21 @@ def test_delete_action(app):
             )
             db.session.commit()
         action = RecordIndexer()._delete_action(
-            dict(id=str(record.id), op="delete", index=None, doc_type=None)
+            dict(id=str(record.id), op="delete", index=None)
         )
         assert action["_op_type"] == "delete"
         assert action["_index"] == "records-authorities-authority-v1.0.0"
-        assert action["_type"] == "_doc"
         assert action["_id"] == str(record.id)
 
         record.delete()
         db.session.commit()
         action = RecordIndexer()._delete_action(
-            dict(id=str(record.id), op="delete", index=None, doc_type=None)
+            dict(id=str(record.id), op="delete", index=None)
         )
         assert action["_op_type"] == "delete"
-        # Deleted record doesn't have '$schema', so index and doc type cannot
-        # be determined, resulting to the defaults from config
+        # Deleted record doesn't have '$schema', so index cannot
+        # be determined, resulting to the default from config
         assert action["_index"] == app.config["INDEXER_DEFAULT_INDEX"]
-        assert action["_type"] == "_doc"
         assert action["_id"] == str(record.id)
 
 
@@ -116,7 +113,6 @@ def test_index_action(app):
             assert action["_op_type"] == "index"
             assert action["_index"] == app.config["INDEXER_DEFAULT_INDEX"]
             assert action["_id"] == str(record.id)
-            assert action["_type"] == "_doc"
             assert action["_version"] == record.revision_id
             assert action["_version_type"] == "external_gte"
             assert action["pipeline"] == "foobar"
@@ -191,7 +187,6 @@ def test_index(app):
             version=0,
             version_type="force",
             index=app.config["INDEXER_DEFAULT_INDEX"],
-            doc_type="_doc",
             body={
                 "title": "Test",
                 "_created": pytz.utc.localize(record.created).isoformat(),
@@ -276,7 +271,6 @@ def test_delete(app):
         client_mock.delete.assert_called_with(
             id=str(recid),
             index=app.config["INDEXER_DEFAULT_INDEX"],
-            doc_type="_doc",
             version=record.revision_id,
             version_type="external_gte",
         )
