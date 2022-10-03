@@ -8,6 +8,14 @@
 Changes
 =======
 
+Version 2.1.0 (releases 2022-10-03)
+
+- Add support to OpenSearch v2
+- Remove `doc_type` param
+- Change `record_to_index` to return only the index and not a tuple with index and
+  doc type.
+- Remove the config var `INDEXER_DEFAULT_DOC_TYPE`
+
 Version 2.0.1 (released 2022-09-26)
 
 - Bump upper pin of invenio-records
