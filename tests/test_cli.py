@@ -59,6 +59,8 @@ def test_reindex(app):
         db.session.commit()
         indexer = RecordIndexer()
         index = indexer.record_to_index(record1)
+        # can be removed when tuple support is removed
+        index = index[0] if isinstance(index, tuple) else index
 
         # Make sure the index doesn't exist at the beginning (it was not
         # preserved by accident from some other tests)

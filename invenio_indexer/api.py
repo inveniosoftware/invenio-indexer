@@ -17,7 +17,7 @@ from celery import current_app as current_celery_app
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
-from invenio_search.engine import check_os_version, dsl, search
+from invenio_search.engine import dsl, search
 from invenio_search.utils import build_alias_name
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
@@ -159,6 +159,9 @@ class RecordIndexer(object):
         :param record: Record instance.
         """
         index = self.record_to_index(record)
+        # can be removed when tuple support is removed
+        index = index[0] if isinstance(index, tuple) else index
+
         arguments = arguments or {}
         body = self._prepare_record(record, index, arguments, **kwargs)
         index = self._prepare_index(index)
@@ -221,6 +224,9 @@ class RecordIndexer(object):
         :param kwargs: Passed to `search.delete`.
         """
         index = self.record_to_index(record)
+        # can be removed when tuple support is removed
+        index = index[0] if isinstance(index, tuple) else index
+
         index = self._prepare_index(index)
 
         # Pop version arguments for backward compatibility if they were
@@ -350,6 +356,9 @@ class RecordIndexer(object):
         if not index:
             record = self.record_cls.get_record(payload["id"], with_deleted=True)
             index = self.record_to_index(record)
+            # can be removed when tuple support is removed
+            index = index[0] if isinstance(index, tuple) else index
+
             kwargs["_version"] = record.revision_id
             kwargs["_version_type"] = self._version_type
         else:
@@ -375,6 +384,8 @@ class RecordIndexer(object):
         """
         record = self.record_cls.get_record(payload["id"])
         index = self.record_to_index(record)
+        # can be removed when tuple support is removed
+        index = index[0] if isinstance(index, tuple) else index
 
         arguments = {}
         body = self._prepare_record(record, index, arguments)
