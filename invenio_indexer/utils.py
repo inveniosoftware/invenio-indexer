@@ -24,41 +24,40 @@ def schema_to_index(schema, index_names=None):
     :returns: The index.
     """
     parts = schema.split("/")
-    doc_type, ext = os.path.splitext(parts[-1])
-    parts[-1] = doc_type
-    doc_type = "_doc"
+    rec_type, ext = os.path.splitext(parts[-1])
+    parts[-1] = rec_type
 
     if ext not in {
         ".json",
     }:
-        return (None, None)
+        return None
 
     if index_names is None:
         index = build_index_from_parts(*parts)
-        return index, doc_type
+        return index
 
     for start in range(len(parts)):
         name = build_index_from_parts(*parts[start:])
         if name in index_names:
-            return name, doc_type
+            return name
 
-    return (None, None)
+    return None
 
 
 def default_record_to_index(record):
-    """Get index/doc_type given a record.
+    """Get index given a record.
 
-    It tries to extract from `record['$schema']` the index and doc_type.
+    It tries to extract from `record['$schema']` the index.
     If it fails, return the default values.
 
     :param record: The record object.
-    :returns: Tuple (index, doc_type).
+    :returns: index.
     """
     index_names = current_search.mappings.keys()
     schema = record.get("$schema", "")
     if isinstance(schema, dict):
         schema = schema.get("$ref", "")
 
-    index, _ = schema_to_index(schema, index_names=index_names)
+    index = schema_to_index(schema, index_names=index_names)
 
     return index or current_app.config["INDEXER_DEFAULT_INDEX"]

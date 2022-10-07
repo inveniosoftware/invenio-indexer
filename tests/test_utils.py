@@ -18,7 +18,7 @@ from invenio_indexer.utils import schema_to_index
 def test_schema_to_index_with_names(app):
     """Test that prefix is added to the index when creating it."""
     result = schema_to_index("default.json", index_names=["default"])
-    assert result == ("default", "_doc")
+    assert result == "default"
 
 
 @pytest.mark.parametrize(
@@ -26,27 +26,27 @@ def test_schema_to_index_with_names(app):
     (
         (
             "records/record-v1.0.0.json",
-            ("records-record-v1.0.0", "record-v1.0.0"),
+            "records-record-v1.0.0",
             None,
         ),
         (
             "/records/record-v1.0.0.json",
-            ("records-record-v1.0.0", "record-v1.0.0"),
+            "records-record-v1.0.0",
             None,
         ),
         (
             "default-v1.0.0.json",
-            ("default-v1.0.0", "default-v1.0.0"),
+            "default-v1.0.0",
             None,
         ),
         (
             "default-v1.0.0.json",
-            (None, None),
+            None,
             [],
         ),
         (
             "invalidextension",
-            (None, None),
+            None,
             None,
         ),
     ),
@@ -54,6 +54,4 @@ def test_schema_to_index_with_names(app):
 def test_schema_to_index(schema, expected, index_names, app):
     """Test the expected value of schema to index."""
     result = schema_to_index(schema, index_names=index_names)
-    if expected[0]:
-        expected = (expected[0], "_doc")
     assert result == expected
