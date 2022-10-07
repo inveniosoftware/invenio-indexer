@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 2.1.1 (releases 2022-10-07)
+
+- Change `schema_to_index` to return only the index and not a tuple with index and
+  doc type.
+
 Version 2.1.0 (releases 2022-10-03)
 
 - Add support to OpenSearch v2
