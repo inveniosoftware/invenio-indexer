@@ -21,7 +21,7 @@ def test_schema_to_index_with_names(app):
     result = schema_to_index('default.json', index_names=['default'])
     assert result == (
         'default',
-        '_doc' if ES_VERSION[0] >= 7 else 'default'
+        None if ES_VERSION[0] >= 7 else 'default'
     )
 
 
@@ -59,5 +59,5 @@ def test_schema_to_index(schema, expected, index_names, app):
     """Test the expected value of schema to index."""
     result = schema_to_index(schema, index_names=index_names)
     if ES_VERSION[0] >= 7 and expected[0]:
-        expected = (expected[0], '_doc')
+        expected = (expected[0], None)
     assert result == expected
