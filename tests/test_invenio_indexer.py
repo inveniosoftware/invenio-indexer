@@ -64,7 +64,7 @@ def test_hook_initialization(base_app):
         RecordIndexer(search_client=client_mock, version_type='force').index(
             record)
         args = (app, )
-        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else '_doc'
+        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else None
         kwargs = dict(
             index=app.config['INDEXER_DEFAULT_INDEX'],
             doc_type=doc_type,
@@ -122,7 +122,7 @@ def test_index_prefixing(base_app):
                 version=0,
                 version_type='external_gte',
                 index='test-' + default_index,
-                doc_type=default_doc_type if lt_es7 else '_doc',
+                doc_type=default_doc_type if lt_es7 else None,
                 body={
                     'title': 'Test',
                     '_created': pytz.utc.localize(record.created).isoformat(),
@@ -138,7 +138,7 @@ def test_index_prefixing(base_app):
                 },
                 record=record,
                 index=default_index,  # non-prefixed index passed to receiver
-                doc_type=default_doc_type if lt_es7 else '_doc',
+                doc_type=default_doc_type if lt_es7 else None,
                 arguments={},
             )
 
@@ -148,7 +148,7 @@ def test_index_prefixing(base_app):
                 version=0,
                 version_type='external_gte',
                 index='test-records-authorities-authority-v1.0.0',
-                doc_type='authority-v1.0.0' if lt_es7 else '_doc',
+                doc_type='authority-v1.0.0' if lt_es7 else None,
                 body={
                     '$schema': '/records/authorities/authority-v1.0.0.json',
                     'title': 'Test with schema',
@@ -166,14 +166,14 @@ def test_index_prefixing(base_app):
                 },
                 record=record2,
                 index='records-authorities-authority-v1.0.0',  # no prefix
-                doc_type='authority-v1.0.0' if lt_es7 else '_doc',
+                doc_type='authority-v1.0.0' if lt_es7 else None,
                 arguments={},
             )
             RecordIndexer(search_client=client_mock).delete(record3)
             client_mock.delete.assert_called_with(
                 id=str(record3.id),
                 index='test-' + default_index,
-                doc_type=default_doc_type if lt_es7 else '_doc',
+                doc_type=default_doc_type if lt_es7 else None,
                 version=record3.revision_id,
                 version_type='external_gte',
             )

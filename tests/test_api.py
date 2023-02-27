@@ -79,7 +79,8 @@ def test_delete_action(app):
             dict(id=str(record.id), op='delete', index=None, doc_type=None))
         assert action['_op_type'] == 'delete'
         assert action['_index'] == 'records-authorities-authority-v1.0.0'
-        assert action['_type'] == 'authority-v1.0.0' if lt_es7 else '_doc'
+        if lt_es7:
+            assert action['_type'] == 'authority-v1.0.0'
         assert action['_id'] == str(record.id)
 
         record.delete()
@@ -90,8 +91,9 @@ def test_delete_action(app):
         # Deleted record doesn't have '$schema', so index and doc type cannot
         # be determined, resulting to the defaults from config
         assert action['_index'] == app.config['INDEXER_DEFAULT_INDEX']
-        assert action['_type'] == \
-            app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else '_doc'
+        if lt_es7:
+            assert action['_type'] == \
+                app.config['INDEXER_DEFAULT_DOC_TYPE']
         assert action['_id'] == str(record.id)
 
 
@@ -116,8 +118,6 @@ def test_index_action(app):
             if lt_es7:
                 assert action['_type'] == \
                     app.config['INDEXER_DEFAULT_DOC_TYPE']
-            else:
-                assert action['_type'] == '_doc'
             assert action['_version'] == record.revision_id
             assert action['_version_type'] == 'external_gte'
             assert action['pipeline'] == 'foobar'
@@ -185,7 +185,7 @@ def test_index(app):
         RecordIndexer(search_client=client_mock, version_type='force').index(
             record, arguments={'pipeline': 'foobar'})
 
-        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else '_doc'
+        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else None
         client_mock.index.assert_called_with(
             id=str(recid),
             version=0,
@@ -281,7 +281,7 @@ def test_delete(app):
         client_mock = MagicMock()
         RecordIndexer(search_client=client_mock).delete(record)
 
-        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else '_doc'
+        doc_type = app.config['INDEXER_DEFAULT_DOC_TYPE'] if lt_es7 else None
         client_mock.delete.assert_called_with(
             id=str(recid),
             index=app.config['INDEXER_DEFAULT_INDEX'],
