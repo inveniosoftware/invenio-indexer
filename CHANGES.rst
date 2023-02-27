@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.3.0 (released 2023-02-27)
+
+- fix compatibility issues with opensearch 2 (doc_type removal)
+
+
 Version 1.2.7 (released 2022-05-17)
 
 - Add exists method to RecordIndexer API class.
