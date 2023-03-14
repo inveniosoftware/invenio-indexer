@@ -29,7 +29,7 @@ def schema_to_index(schema, index_names=None):
     doc_type, ext = os.path.splitext(parts[-1])
     parts[-1] = doc_type
     if ES_VERSION[0] >= 7:
-        doc_type = None
+        doc_type = '_doc'
 
     if ext not in {'.json', }:
         return (None, None)
@@ -69,7 +69,7 @@ def default_record_to_index(record):
         )
 
     if ES_VERSION[0] >= 7:
-        doc_type = None
+        doc_type = '_doc'
 
     return index, doc_type
 
