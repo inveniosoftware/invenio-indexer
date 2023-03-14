@@ -1,12 +1,16 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2016-2019 CERN.
+    Copyright (C) 2016-2023 CERN.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version 1.1.3 (released 2023-03-14)
+
+- Add OpenSearch v2 compatibility.
 
 Version 1.1.2 (released 2020-04-28)
 
