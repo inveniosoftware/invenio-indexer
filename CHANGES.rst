@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.1.4 (released 2023-03-15)
+
+- Fixes for OpenSearch v2 compatibility.
+
 Version 1.1.3 (released 2023-03-14)
 
 - Add OpenSearch v2 compatibility.
