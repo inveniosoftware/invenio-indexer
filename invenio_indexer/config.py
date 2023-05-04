@@ -22,6 +22,24 @@ INDEXER_MQ_QUEUE = Queue("indexer", exchange=INDEXER_MQ_EXCHANGE, routing_key="i
 INDEXER_MQ_ROUTING_KEY = "indexer"
 """Default routing key for message queue."""
 
+INDEXER_MQ_PUBLISH_KWARGS = {}
+"""Default message queue producer publishing kwargs.
+
+Passed to ``kombu.Producer:publish``.
+
+.. code-block:: python
+
+    INDEXER_MQ_PUBLISH_KWARGS = {
+        "retry": True,
+        "retry_policy": {         # Setting for maximum waiting time of ~10min:
+            "interval_start": 0,  # First retry immediately,
+            "interval_step": 2,   # then increase by 2s for every retry.
+            "interval_max": 30,   # but don't exceed 30s between retries.
+            "max_retries": 30,    # give up after 30 tries.
+        },
+    }
+"""
+
 INDEXER_REPLACE_REFS = True
 """Whether to replace JSONRefs prior to indexing record."""
 

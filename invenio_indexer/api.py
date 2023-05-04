@@ -17,7 +17,7 @@ from celery import current_app as current_celery_app
 from flask import current_app
 from invenio_records.api import Record
 from invenio_search import current_search_client
-from invenio_search.engine import check_os_version, dsl, search
+from invenio_search.engine import dsl, search
 from invenio_search.utils import build_alias_name
 from kombu import Producer as KombuProducer
 from kombu.compat import Consumer
@@ -69,6 +69,7 @@ class RecordIndexer(object):
         record_to_index=None,
         record_cls=None,
         record_dumper=None,
+        publish_kwargs=None,
     ):
         """Initialize indexer.
 
@@ -93,6 +94,7 @@ class RecordIndexer(object):
         self._record_to_index = record_to_index or current_record_to_index
         self._routing_key = routing_key
         self._version_type = version_type or "external_gte"
+        self._publish_kwargs = publish_kwargs
 
         if record_cls:
             self.record_cls = record_cls
@@ -143,6 +145,13 @@ class RecordIndexer(object):
         :returns: The Message Queue routing key.
         """
         return self._routing_key or current_app.config["INDEXER_MQ_ROUTING_KEY"]
+
+    @property
+    def mq_publish_kwargs(self):
+        """Message Queue producer publish kwargs."""
+        if self._publish_kwargs is not None:  # this allows overriding to {}
+            return self._publish_kwargs
+        return current_app.config["INDEXER_MQ_PUBLISH_KWARGS"]
 
     #
     # High-level API
@@ -315,7 +324,11 @@ class RecordIndexer(object):
                     op=op_type,
                     index=index,
                 )
-                producer.publish(data, declare=[self.mq_queue])
+                producer.publish(
+                    data,
+                    declare=[self.mq_queue],
+                    **self.mq_publish_kwargs,
+                )
 
     def _actionsiter(self, message_iterator):
         """Iterate bulk actions.
