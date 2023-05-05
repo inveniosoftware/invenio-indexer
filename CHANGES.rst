@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2016-2022 CERN.
+    Copyright (C) 2016-2023 CERN.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
@@ -8,12 +8,17 @@
 Changes
 =======
 
-Version 2.1.1 (releases 2022-10-07)
+Version 2.1.2 (released 2023-05-05)
+
+- Allow passing message queue producer publish arguments via the ``RecordIndexer``
+  constructor and the ``INDEXER_MQ_PUBLISH_KWARGS`` config.
+
+Version 2.1.1 (released 2022-10-07)
 
 - Change `schema_to_index` to return only the index and not a tuple with index and
   doc type.
 
-Version 2.1.0 (releases 2022-10-03)
+Version 2.1.0 (released 2022-10-03)
 
 - Add support to OpenSearch v2
 - Remove `doc_type` param
