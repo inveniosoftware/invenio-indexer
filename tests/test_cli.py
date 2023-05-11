@@ -10,14 +10,18 @@
 
 import uuid
 
-from click.testing import CliRunner
+import amqp
+import pytest
+from celery.messaging import establish_connection
 from invenio_db import db
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_records import Record
 from invenio_search import current_search, current_search_client
+from kombu import Queue
 
 from invenio_indexer import cli
 from invenio_indexer.api import RecordIndexer
+from invenio_indexer.proxies import current_indexer_registry
 
 
 def test_run(app):
@@ -99,3 +103,85 @@ def test_reindex(app):
         res = runner.invoke(cli.queue, ["delete"])
         assert 0 == res.exit_code
         list(current_search.delete(ignore=[404]))
+
+
+def test_queues_options(app):
+    """Test queue sub-command options."""
+
+    cli_runner = app.test_cli_runner()
+
+    users_indexer = RecordIndexer(
+        queue=Queue(
+            "users",
+            exchange=app.config["INDEXER_MQ_EXCHANGE"],
+            routing_key="users",
+        ),
+        routing_key="users",
+    )
+    files_indexer = RecordIndexer(
+        queue=Queue(
+            "files",
+            exchange=app.config["INDEXER_MQ_EXCHANGE"],
+            routing_key="files",
+        ),
+        routing_key="files",
+    )
+    current_indexer_registry.register(users_indexer, "users")
+    current_indexer_registry.register(files_indexer, "files")
+    queues = {
+        "default": app.config["INDEXER_MQ_QUEUE"],
+        "users": users_indexer.mq_queue,
+        "files": files_indexer.mq_queue,
+    }
+
+    # Initialize all queues
+    res = cli_runner.invoke(cli.queue, ["--all-queues", "init"])
+    assert 0 == res.exit_code
+
+    with establish_connection() as c:
+        for queue in queues.values():
+            assert queue(c).queue_declare(passive=True)
+
+    # Delete all queues
+    res = cli_runner.invoke(cli.queue, ["--all-queues", "delete"])
+    assert 0 == res.exit_code
+
+    with establish_connection() as c:
+        for queue in queues.values():
+            with pytest.raises(amqp.exceptions.NotFound):
+                queue(c).queue_declare(passive=True)
+
+    # Initialize users queue
+    res = cli_runner.invoke(cli.queue, ["--queue", "users", "init"])
+    assert 0 == res.exit_code
+
+    with establish_connection() as c:
+        assert queues["users"](c).queue_declare(passive=True)
+
+    users_indexer.bulk_index(["123", "456"])
+    files_indexer.bulk_index(["file1", "file2", "file3"])
+
+    with establish_connection() as c:
+        assert queues["users"](c).queue_declare(passive=True).message_count == 2
+        assert queues["files"](c).queue_declare(passive=True).message_count == 3
+        assert queues["default"](c).queue_declare(passive=True).message_count == 0
+
+    # Purge files queue
+    res = cli_runner.invoke(cli.queue, ["--queue", "files", "purge"])
+    assert 0 == res.exit_code
+
+    with establish_connection() as c:
+        assert queues["users"](c).queue_declare(passive=True).message_count == 2
+        assert queues["files"](c).queue_declare(passive=True).message_count == 0
+        assert queues["default"](c).queue_declare(passive=True).message_count == 0
+
+    # Delete files and default queue
+    res = cli_runner.invoke(cli.queue, ["--queue", "files", "delete"])
+    assert 0 == res.exit_code
+
+    with establish_connection() as c:
+        assert queues["users"](c).queue_declare(passive=True).message_count == 2
+        with pytest.raises(amqp.exceptions.NotFound):
+            queues["files"](c).queue_declare(passive=True)
+        with pytest.raises(amqp.exceptions.NotFound):
+            queues["default"](c).queue_declare(passive=True)

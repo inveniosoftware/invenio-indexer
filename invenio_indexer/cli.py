@@ -16,6 +16,7 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_search.cli import index
 
 from .api import RecordIndexer
+from .proxies import current_indexer_registry
 from .tasks import process_bulk_queue
 
 
@@ -110,19 +111,30 @@ def reindex(pid_type):
 
 
 @index.group(chain=True)
-def queue():
+@click.option("-q", "--queue", "indexer_ids", multiple=True)
+@click.option("-a", "--all-queues", is_flag=True)
+def queue(indexer_ids=[], all_queues=False):
     """Manage indexing queue."""
 
 
 @resultcallback(queue)
 @with_appcontext
-def process_actions(actions):
+def process_actions(actions, indexer_ids=[], all_queues=False):
     """Process queue actions."""
-    queue = current_app.config["INDEXER_MQ_QUEUE"]
+    # Resolve indexer IDs
+    if all_queues:
+        indexers = current_indexer_registry.all().values()
+    else:
+        indexers = [current_indexer_registry.get(i) for i in indexer_ids]
+    # Get queues
+    queues = [i.mq_queue for i in indexers]
+    # Always add the default indexer queue (for backwards compatibility)
+    queues.append(current_app.config["INDEXER_MQ_QUEUE"])
     with establish_connection() as c:
-        q = queue(c)
-        for action in actions:
-            q = action(q)
+        for queue in queues:
+            bound_queue = queue(c)
+            for action in actions:
+                action(bound_queue)
 
 
 @queue.command("init")
