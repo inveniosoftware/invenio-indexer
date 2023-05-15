@@ -34,7 +34,7 @@ jobs:
         python-version: [3.7, 3.8, 3.9]
         requirements-level: [pypi]
         cache-service: [redis]
-        mq-service: [rabbitmq, redis]
+        mq-service: [rabbitmq]
         search-service: [opensearch2,elasticsearch7]
 
         include:
