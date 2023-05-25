@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 2.2.0 (released 2023-05-25)
+
+- cli: add queue selection options
+- tests: remove redis as message backend
+
 Version 2.1.2 (released 2023-05-05)
 
 - Allow passing message queue producer publish arguments via the ``RecordIndexer``
