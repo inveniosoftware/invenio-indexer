@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 2.2.1 (released 2023-09-28)
+
+- bulk: make configurable the number of records to be bulk indexed per task
+
 Version 2.2.0 (released 2023-05-25)
 
 - cli: add queue selection options
