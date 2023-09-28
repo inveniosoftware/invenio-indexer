@@ -15,7 +15,7 @@ from .proxies import current_indexer_registry
 
 
 @shared_task(ignore_result=True)
-def process_bulk_queue(version_type=None, search_bulk_kwargs=None, indexer_name=None):
+def process_bulk_queue(version_type=None, search_bulk_kwargs=None, indexer_name=None, bulk_chunk_limit=None):
     """Process bulk indexing queue.
 
     :param str version_type: the search engine version type.
@@ -30,7 +30,7 @@ def process_bulk_queue(version_type=None, search_bulk_kwargs=None, indexer_name=
     else:
         indexer = RecordIndexer(version_type=version_type)
 
-    indexer.process_bulk_queue(search_bulk_kwargs=search_bulk_kwargs)
+    indexer.process_bulk_queue(search_bulk_kwargs=search_bulk_kwargs, bulk_chunk_limit=bulk_chunk_limit)
 
 
 @shared_task(ignore_result=True)

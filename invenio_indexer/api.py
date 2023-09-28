@@ -70,6 +70,7 @@ class RecordIndexer(object):
         record_cls=None,
         record_dumper=None,
         publish_kwargs=None,
+        bulk_chunk_limit=None,
     ):
         """Initialize indexer.
 
@@ -87,6 +88,7 @@ class RecordIndexer(object):
             document.
         :param record_dumper: Dumper instance to use for dumping the record.
             Only has an effect for new-style record dumping.
+        :param bulk_chunk_limit: Limit of records processed by the bulk operations.
         """
         self.client = search_client or current_search_client
         self._exchange = exchange
@@ -95,6 +97,7 @@ class RecordIndexer(object):
         self._routing_key = routing_key
         self._version_type = version_type or "external_gte"
         self._publish_kwargs = publish_kwargs
+        self._bulk_chunk_limit = bulk_chunk_limit
 
         if record_cls:
             self.record_cls = record_cls
@@ -281,15 +284,20 @@ class RecordIndexer(object):
             req_timeout = current_app.config["INDEXER_BULK_REQUEST_TIMEOUT"]
 
             search_bulk_kwargs = search_bulk_kwargs or {}
-
+            messages = [
+                *consumer.iterqueue(limit=self._bulk_chunk_limit)
+            ]  # We convert it to a list to be able to loop and ack all messages after the bulk is done
             count = bulk(
                 self.client,
-                self._actionsiter(consumer.iterqueue()),
+                self._actionsiter(messages),
                 stats_only=True,
                 request_timeout=req_timeout,
                 expand_action_callback=search.helpers.expand_action,
                 **search_bulk_kwargs,
             )
+
+            for message in messages:
+                message.ack()
 
             consumer.close()
 
