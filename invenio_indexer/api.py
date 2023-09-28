@@ -70,6 +70,7 @@ class RecordIndexer(object):
         record_cls=None,
         record_dumper=None,
         publish_kwargs=None,
+        bulk_index_max_items=10_000,
     ):
         """Initialize indexer.
 
@@ -87,6 +88,8 @@ class RecordIndexer(object):
             document.
         :param record_dumper: Dumper instance to use for dumping the record.
             Only has an effect for new-style record dumping.
+        :param bulk_index_max_items: max number of records to consume per task, when
+            bulk indexing.
         """
         self.client = search_client or current_search_client
         self._exchange = exchange
@@ -95,6 +98,7 @@ class RecordIndexer(object):
         self._routing_key = routing_key
         self._version_type = version_type or "external_gte"
         self._publish_kwargs = publish_kwargs
+        self._bulk_index_max_items = bulk_index_max_items
 
         if record_cls:
             self.record_cls = record_cls
@@ -265,10 +269,13 @@ class RecordIndexer(object):
         """
         self._bulk_op(record_id_iterator, "delete")
 
-    def process_bulk_queue(self, search_bulk_kwargs=None):
+    def process_bulk_queue(self, search_bulk_kwargs=None, bulk_index_max_items=None):
         """Process bulk indexing queue.
 
         :param dict search_bulk_kwargs: Passed to `search.helpers.bulk`.
+        :param int bulk_index_max_items: max number of records to consume per task,
+            when bulk indexing. If None, the default from the class attribute will
+            be used instead.
         """
         with current_celery_app.pool.acquire(block=True) as conn:
             consumer = Consumer(
@@ -279,12 +286,12 @@ class RecordIndexer(object):
             )
 
             req_timeout = current_app.config["INDEXER_BULK_REQUEST_TIMEOUT"]
-
             search_bulk_kwargs = search_bulk_kwargs or {}
+            bulk_index_max_items = bulk_index_max_items or self._bulk_index_max_items
 
             count = bulk(
                 self.client,
-                self._actionsiter(consumer.iterqueue()),
+                self._actionsiter(consumer.iterqueue(limit=bulk_index_max_items)),
                 stats_only=True,
                 request_timeout=req_timeout,
                 expand_action_callback=search.helpers.expand_action,
