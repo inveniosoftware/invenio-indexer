@@ -53,7 +53,10 @@ def default_record_to_index(record):
     :param record: The record object.
     :returns: index.
     """
-    index_names = current_search.mappings.keys()
+    # The indices could be defined either in the mappings or in the index_templates
+    index_names = list(current_search.mappings.keys()) + list(
+        current_search.index_templates.keys()
+    )
     schema = record.get("$schema", "")
     if isinstance(schema, dict):
         schema = schema.get("$ref", "")
