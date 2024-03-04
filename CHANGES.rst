@@ -1,12 +1,16 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2016-2023 CERN.
+    Copyright (C) 2016-2024 CERN.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version 2.3.0 (released 2024-03-04)
+
+- indexer: Allow the definition of indices in index_templates, instead of mappings
 
 Version 2.2.1 (released 2023-09-28)
 
