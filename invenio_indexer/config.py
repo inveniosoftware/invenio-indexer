@@ -10,7 +10,7 @@
 
 from kombu import Exchange, Queue
 
-INDEXER_DEFAULT_INDEX = "records-record-v1.0.0"
+INDEXER_DEFAULT_INDEX = None
 """Default index to use if no schema is defined."""
 
 INDEXER_MQ_EXCHANGE = Exchange("indexer", type="direct")

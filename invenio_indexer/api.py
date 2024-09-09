@@ -112,6 +112,8 @@ class RecordIndexer(object):
         :returns: The index.
         """
         result = self._record_to_index(record)
+        if result is None:
+            raise ValueError("Index for record cannot be `None`")
         if isinstance(result, tuple):
             warnings.warn(
                 (
