@@ -57,8 +57,16 @@ def resultcallback(group):
     default=True,
     help="Controls if the search engine bulk indexing errors raise an exception.",
 )
+@click.option(
+    "--chunk_size",
+    default=500,
+    type=int,
+    help="Number of documents to send per batch.",
+)
 @with_appcontext
-def run(delayed, concurrency, version_type=None, queue=None, raise_on_error=True):
+def run(
+    delayed, concurrency, chunk_size, version_type=None, queue=None, raise_on_error=True
+):
     """Run bulk record indexing."""
     if delayed:
         celery_kwargs = {
@@ -77,7 +85,10 @@ def run(delayed, concurrency, version_type=None, queue=None, raise_on_error=True
     else:
         click.secho("Indexing records...", fg="green")
         RecordIndexer(version_type=version_type).process_bulk_queue(
-            search_bulk_kwargs={"raise_on_error": raise_on_error}
+            search_bulk_kwargs={
+                "raise_on_error": raise_on_error,
+                "chunk_size": chunk_size,
+            }
         )
 
 
