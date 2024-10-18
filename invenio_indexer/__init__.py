@@ -64,16 +64,19 @@ Let's start by creating a record that we would like to index:
 Note, that you are responsible for ensuring that the record is committed to the
 database, prior to sending it for indexing.
 
-Now, let's index the record:
+Now, let's index the record. By default, records are sent to the search engine
+index defined by the configuration variable ``INDEXER_DEFAULT_INDEX``. This
+is set to ``None`` by default, to enforce that you always have to specify the
+index when indexing a record. For now let's set it to a default value and index
+the record:
 
+>>> app.config['INDEXER_DEFAULT_INDEX'] = "records-record-v1.0.0"
 >>> from invenio_indexer.api import RecordIndexer
 >>> indexer = RecordIndexer()
 >>> res = indexer.index(record)
 
-By default, records are sent to the search engine index defined by the
-configuration variable ``INDEXER_DEFAULT_INDEX``. If the record however has a
-``$schema`` attribute, the index is automatically determined from this. E.g.
-the following record:
+If the record however has a ``$schema`` attribute, the index is automatically
+determined from this. E.g. the following record:
 
 >>> r = Record({
 ...     '$schema': 'http://example.org/records/record-v1.0.0.json'})
