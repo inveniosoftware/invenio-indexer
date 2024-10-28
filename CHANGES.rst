@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 2.4.0 (released 2024-10-28)
+- config: remove INDEXER_DEFAULT_INDEX default value
+- cli: run command accepts a new parameter 'chunk_size'
+- ci: remove docker-compose line
+
 Version 2.3.0 (released 2024-03-04)
 
 - indexer: Allow the definition of indices in index_templates, instead of mappings
