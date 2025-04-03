@@ -187,6 +187,23 @@ class RecordIndexer(object):
             **arguments,
         )
 
+    def create(self, record, arguments=None, **kwargs):
+        """Index a record via the create API.
+
+        :param record: Record instance.
+        """
+        index = self.record_to_index(record)
+        arguments = arguments or {}
+        body = self._prepare_record(record, index, arguments, **kwargs)
+        index = self._prepare_index(index)
+
+        return self.client.create(
+            id=str(record.id),
+            index=index,
+            body=body,
+            **arguments,
+        )
+
     def index_by_id(self, record_uuid, **kwargs):
         """Index a record by record identifier.
 
