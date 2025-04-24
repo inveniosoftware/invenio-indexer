@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 3.1.0 (release 2025-04-24)
+
+- api: add datastream index create
+
 Version 3.0.0 (release 2024-11-29)
 
 - setup: bump major dependencies
