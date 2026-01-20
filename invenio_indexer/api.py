@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2016-2022 CERN.
+# Copyright (C) 2026 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -12,7 +13,6 @@ import copy
 import warnings
 from contextlib import contextmanager
 
-import pytz
 from celery import current_app as current_celery_app
 from flask import current_app
 from invenio_records.api import Record
@@ -468,12 +468,8 @@ class RecordIndexer(object):
         else:
             data = record.dumps()
 
-        data["_created"] = (
-            pytz.utc.localize(record.created).isoformat() if record.created else None
-        )
-        data["_updated"] = (
-            pytz.utc.localize(record.updated).isoformat() if record.updated else None
-        )
+        data["_created"] = record.created.isoformat() if record.created else None
+        data["_updated"] = record.updated.isoformat() if record.updated else None
 
         # Allow modification of data prior to sending to the search engine.
         before_record_index.send(
