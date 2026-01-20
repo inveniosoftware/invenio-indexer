@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2016-2022 CERN.
+# Copyright (C) 2026 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -52,13 +53,15 @@ def base_app(request):
     search.register_mappings("records", "data")
 
     with app.app_context():
-        if not database_exists(str(db.engine.url)):
-            create_database(str(db.engine.url))
+        if not database_exists(
+            str(db.engine.url.render_as_string(hide_password=False))
+        ):
+            create_database(str(db.engine.url.render_as_string(hide_password=False)))
         db.create_all()
 
     def teardown():
         with app.app_context():
-            drop_database(str(db.engine.url))
+            drop_database(str(db.engine.url.render_as_string(hide_password=False)))
         shutil.rmtree(instance_path)
 
     request.addfinalizer(teardown)
