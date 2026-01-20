@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2016-2022 CERN.
+# Copyright (C) 2026 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -11,7 +12,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
 
-import pytz
 from flask import Flask
 from invenio_db import db
 from invenio_records import Record
@@ -69,8 +69,8 @@ def test_hook_initialization(base_app):
             record=record,
             json={
                 "title": "Test",
-                "_created": pytz.utc.localize(record.created).isoformat(),
-                "_updated": pytz.utc.localize(record.updated).isoformat(),
+                "_created": record.created.isoformat(),
+                "_updated": record.updated.isoformat(),
             },
         )
         magic_hook.assert_called_with(*args, **kwargs)
@@ -82,8 +82,8 @@ def test_hook_initialization(base_app):
             index=app.config["INDEXER_DEFAULT_INDEX"],
             body={
                 "title": "Test",
-                "_created": pytz.utc.localize(record.created).isoformat(),
-                "_updated": pytz.utc.localize(record.updated).isoformat(),
+                "_created": record.created.isoformat(),
+                "_updated": record.updated.isoformat(),
             },
         )
 
@@ -122,16 +122,16 @@ def test_index_prefixing(base_app):
                 index="test-" + default_index,
                 body={
                     "title": "Test",
-                    "_created": pytz.utc.localize(record.created).isoformat(),
-                    "_updated": pytz.utc.localize(record.updated).isoformat(),
+                    "_created": record.created.isoformat(),
+                    "_updated": record.updated.isoformat(),
                 },
             )
             before_record_index_send.assert_called_with(
                 app,
                 json={
                     "title": "Test",
-                    "_created": pytz.utc.localize(record.created).isoformat(),
-                    "_updated": pytz.utc.localize(record.updated).isoformat(),
+                    "_created": record.created.isoformat(),
+                    "_updated": record.updated.isoformat(),
                 },
                 record=record,
                 index=default_index,  # non-prefixed index passed to receiver
@@ -147,8 +147,8 @@ def test_index_prefixing(base_app):
                 body={
                     "$schema": "/records/authorities/authority-v1.0.0.json",
                     "title": "Test with schema",
-                    "_created": pytz.utc.localize(record2.created).isoformat(),
-                    "_updated": pytz.utc.localize(record2.updated).isoformat(),
+                    "_created": record2.created.isoformat(),
+                    "_updated": record2.updated.isoformat(),
                 },
             )
             before_record_index_send.assert_called_with(
@@ -156,8 +156,8 @@ def test_index_prefixing(base_app):
                 json={
                     "$schema": "/records/authorities/authority-v1.0.0.json",
                     "title": "Test with schema",
-                    "_created": pytz.utc.localize(record2.created).isoformat(),
-                    "_updated": pytz.utc.localize(record2.updated).isoformat(),
+                    "_created": record2.created.isoformat(),
+                    "_updated": record2.updated.isoformat(),
                 },
                 record=record2,
                 index="records-authorities-authority-v1.0.0",  # no prefix

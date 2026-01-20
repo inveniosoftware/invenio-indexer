@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2016-2022 CERN.
+# Copyright (C) 2026 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -12,7 +13,6 @@ import json
 import uuid
 from unittest.mock import MagicMock, patch
 
-import pytz
 from celery.messaging import establish_connection
 from invenio_db import db
 from invenio_records.api import Record
@@ -189,8 +189,8 @@ def test_index(app):
             index=app.config["INDEXER_DEFAULT_INDEX"],
             body={
                 "title": "Test",
-                "_created": pytz.utc.localize(record.created).isoformat(),
-                "_updated": pytz.utc.localize(record.updated).isoformat(),
+                "_created": record.created.isoformat(),
+                "_updated": record.updated.isoformat(),
             },
             pipeline="foobar",
         )
