@@ -1,13 +1,19 @@
 ..
     This file is part of Invenio.
     Copyright (C) 2016-2024 CERN.
-    Copyright (C) 2024 Graz University of Technology.
+    Copyright (C) 2024-2026 Graz University of Technology.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version v4.0.0 (released 2026-01-28)
+
+- chore(setup): bump dependencies
+- fix(tests): update due to sqlalchemy>=2.0.0
+- fix(chore): DeprecationWarning stdlib
 
 Version 3.1.0 (release 2025-04-24)
 
