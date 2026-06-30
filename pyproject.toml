@@ -1,4 +1,96 @@
-[build-system]
-requires = ["setuptools", "wheel", "babel>2.8"]
-build-backend = "setuptools.build_meta"
+# SPDX-FileCopyrightText: 2016-2024 CERN.
+# SPDX-FileCopyrightText: 2022-2026 Graz University of Technology.
+# SPDX-FileCopyrightText: 2026 TU Wien.
+# SPDX-License-Identifier: MIT
 
+[project]
+name = "invenio-indexer"
+description = "Record indexer for Invenio."
+readme = "README.rst"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+  { name = "CERN", email = "info@inveniosoftware.org" },
+]
+keywords = [
+  "indexing",
+  "invenio",
+  "search",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+]
+dependencies = [
+  "invenio-db>=2.2.0,<3.0.0",
+  "invenio-pidstore>=3.0.0,<4.0.0",
+  "invenio-records>=5.0.0,<6.0.0",
+  "pytz>=2016.4",
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/inveniosoftware/invenio-indexer"
+
+[project.entry-points."invenio_base.api_apps"]
+invenio_indexer = "invenio_indexer:InvenioIndexer"
+
+[project.entry-points."invenio_base.apps"]
+invenio_indexer = "invenio_indexer:InvenioIndexer"
+
+[project.entry-points."invenio_celery.tasks"]
+invenio_indexer = "invenio_indexer.tasks"
+
+[project.optional-dependencies]
+docs = []
+elasticsearch7 = [
+  "elasticsearch>=7.5.0,<7.14.0",
+  "invenio-search[elasticsearch7]>=3.0.0,<4.0.0",
+]
+opensearch1 = [
+  "invenio-search[opensearch1]>=3.0.0,<4.0.0",
+]
+opensearch2 = [
+  "invenio-search[opensearch2]>=3.0.0,<4.0.0",
+]
+tests = [
+  "attrs>=17.4.0",
+  "pytest-black>=0.6.0",
+  "pytest-invenio>=4.0.0,<5.0.0",
+  "redis>=3.4.0",
+  "sphinx>=4.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "invenio_indexer/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/invenio_indexer",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.pydocstyle]
+add_ignore = "D401"
+
+[tool.pytest.ini_options]
+addopts = '--black --isort --pydocstyle --doctest-glob="*.rst" --doctest-modules --cov=invenio_indexer --cov-report=term-missing'
+filterwarnings = ["ignore::pytest.PytestDeprecationWarning"]
+testpaths = "tests invenio_indexer"
+live_server_scope = "module"
+
+# UV needs to be told explicitly which extras are conflicting:
+# https://docs.astral.sh/uv/concepts/projects/config/#conflicting-dependencies
+[tool.uv]
+conflicts = [
+  [
+    { extra = "opensearch1" },
+    { extra = "opensearch2" },
+    { extra = "elasticsearch7" },
+  ]
+]
