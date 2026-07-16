@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2016-2024 CERN.
 # SPDX-FileCopyrightText: 2024-2026 Graz University of Technology.
+# SPDX-FileCopyrightText: 2026 TU Wien.
 # SPDX-License-Identifier: MIT
 
 """Record indexer for Invenio.
@@ -179,6 +180,6 @@ If specific types of records have different rules (e.g. in case you had
 from .ext import InvenioIndexer
 from .proxies import current_record_to_index
 
-__version__ = "6.0.0"
+__version__ = "6.0.1"
 
 __all__ = ("__version__", "InvenioIndexer", "current_record_to_index")
