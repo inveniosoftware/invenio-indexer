@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v6.0.2 (released 2026-11-19)
+
+- chore(deps): remove redundant unused pytz
+
 Version v6.0.1 (released 2026-07-16)
 
 - chore(setup): migrate from setuptools to hatchling
